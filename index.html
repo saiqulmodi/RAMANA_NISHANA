@@ -281,56 +281,90 @@
         if (!ctx) return;
         const now = ctx.currentTime;
 
-        // Layer 1: Supersonic white-noise muzzle blast crack
-        const bufLen = Math.floor(ctx.sampleRate * 0.18);
+        // Distinct ballistic acoustic profiles per pistol caliber (w1..w4)
+        const profiles = {
+          w1: { dur: 0.11, decay: 0.018, fStart: 2800, fEnd: 820, nGain: 0.42, pStart: 320, pEnd: 95,  pGain: 0.32, pDur: 0.07, slideFreq: 3400 }, // 10m Olympic Air Pistol (crisp pneumatic snap)
+          w2: { dur: 0.18, decay: 0.032, fStart: 1950, fEnd: 380, nGain: 0.65, pStart: 215, pEnd: 42,  pGain: 0.55, pDur: 0.12, slideFreq: 2950 }, // 9mm Match Tactical (sharp supersonic crack)
+          w3: { dur: 0.28, decay: 0.058, fStart: 1350, fEnd: 210, nGain: 0.85, pStart: 155, pEnd: 28,  pGain: 0.78, pDur: 0.19, slideFreq: 2300 }, // .357 Magnum Heavy (deep cannon boom)
+          w4: { dur: 0.24, decay: 0.046, fStart: 2200, fEnd: 310, nGain: 0.78, pStart: 185, pEnd: 34,  pGain: 0.70, pDur: 0.16, slideFreq: 3150 }  // Golden Sovereign Custom (compensated port crack)
+        };
+        const p = profiles[state.equippedId] || profiles.w2;
+
+        // Layer 1: Caliber-tuned white-noise muzzle blast
+        const bufLen = Math.floor(ctx.sampleRate * p.dur);
         const noiseBuf = ctx.createBuffer(1, bufLen, ctx.sampleRate);
         const data = noiseBuf.getChannelData(0);
         for (let i = 0; i < bufLen; i++) {
-          data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (ctx.sampleRate * 0.032));
+          data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (ctx.sampleRate * p.decay));
         }
         const noise = ctx.createBufferSource();
         noise.buffer = noiseBuf;
 
         const filter = ctx.createBiquadFilter();
         filter.type = 'bandpass';
-        filter.frequency.setValueAtTime(1950, now);
-        filter.frequency.exponentialRampToValueAtTime(380, now + 0.14);
+        filter.frequency.setValueAtTime(p.fStart, now);
+        filter.frequency.exponentialRampToValueAtTime(p.fEnd, now + p.dur * 0.85);
         filter.Q.value = 0.85;
 
         const noiseGain = ctx.createGain();
-        noiseGain.gain.setValueAtTime(0.65, now);
-        noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.17);
+        noiseGain.gain.setValueAtTime(p.nGain, now);
+        noiseGain.gain.exponentialRampToValueAtTime(0.001, now + p.dur);
 
         noise.connect(filter);
         filter.connect(noiseGain);
         noiseGain.connect(ctx.destination);
         noise.start(now);
 
-        // Layer 2: Low-end chamber punch (210 Hz -> 42 Hz)
+        // Layer 2: Chamber sub-bass punch
         const punchOsc = ctx.createOscillator();
         const punchGain = ctx.createGain();
         punchOsc.type = 'triangle';
-        punchOsc.frequency.setValueAtTime(215, now);
-        punchOsc.frequency.exponentialRampToValueAtTime(42, now + 0.11);
-        punchGain.gain.setValueAtTime(0.55, now);
-        punchGain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+        punchOsc.frequency.setValueAtTime(p.pStart, now);
+        punchOsc.frequency.exponentialRampToValueAtTime(p.pEnd, now + p.pDur);
+        punchGain.gain.setValueAtTime(p.pGain, now);
+        punchGain.gain.exponentialRampToValueAtTime(0.001, now + p.pDur + 0.01);
         punchOsc.connect(punchGain);
         punchGain.connect(ctx.destination);
         punchOsc.start(now);
-        punchOsc.stop(now + 0.13);
+        punchOsc.stop(now + p.pDur + 0.02);
 
-        // Layer 3: Steel slide blowback mechanical clack (+50 ms)
+        // Layer 3: Mechanical slide cycle clack
         const slideOsc = ctx.createOscillator();
         const slideGain = ctx.createGain();
         slideOsc.type = 'square';
-        slideOsc.frequency.setValueAtTime(2950, now + 0.05);
-        slideOsc.frequency.exponentialRampToValueAtTime(1400, now + 0.09);
-        slideGain.gain.setValueAtTime(0.09, now + 0.05);
+        slideOsc.frequency.setValueAtTime(p.slideFreq, now + 0.048);
+        slideOsc.frequency.exponentialRampToValueAtTime(p.slideFreq * 0.48, now + 0.09);
+        slideGain.gain.setValueAtTime(0.09, now + 0.048);
         slideGain.gain.exponentialRampToValueAtTime(0.001, now + 0.095);
         slideOsc.connect(slideGain);
         slideGain.connect(ctx.destination);
-        slideOsc.start(now + 0.05);
+        slideOsc.start(now + 0.048);
         slideOsc.stop(now + 0.10);
+      }
+
+      function playSteelGongPing() {
+        if (state.muted) return;
+        initAudio();
+        const ctx = state.audioCtx;
+        if (!ctx) return;
+        const now = ctx.currentTime;
+        // Inharmonic steel-plate overtones (1380 Hz fundamental + 2190 Hz + 3410 Hz shimmer)
+        [
+          { f: 1380, g: 0.22, d: 0.65 },
+          { f: 2190, g: 0.14, d: 0.48 },
+          { f: 3410, g: 0.08, d: 0.30 }
+        ].forEach(h => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(h.f, now);
+          gain.gain.setValueAtTime(h.g, now);
+          gain.gain.exponentialRampToValueAtTime(0.0005, now + h.d);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + h.d + 0.02);
+        });
       }
 
       // --- Three.js Scene, Renderer & High-Fidelity Lighting ---
@@ -853,7 +887,7 @@
             pin.position.set(dx, dy, 0.16);
             stuckGroup.add(pin);
 
-            playTone(ringPts === 10 ? 880 : 620, 0.2, 'triangle', 0.18);
+            if (ringPts === 10) { playSteelGongPing(); } else { playTone(620, 0.2, 'triangle', 0.18); }
             triggerHaptic(50);
             banner.innerHTML = `<span class="text-amber-300 font-black">${ringPts === 10 ? 'BULLSEYE 10!' : ringPts + ' RING HIT!'}</span> +<b>${pts}</b> pts (${state.stageHits}/5 stage hits)`;
           } else {
