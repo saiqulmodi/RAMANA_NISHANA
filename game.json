@@ -1,0 +1,11 @@
+{
+  "id": "saiqulmodi-ramana-nishana",
+  "slug": "ramana-nishana",
+  "title": "RAMANA_NISHANA Pistol Range",
+  "author": "@saiqulmodi",
+  "category": "Sports & Precision",
+  "description": "3D ballistic pistol marksmanship range with 4 distinct calibers, steel-gong bullseye pings, Corner Spotter Zoom, and 5-target 1m firing line.",
+  "entry": "index.html",
+  "thumbnail": "thumbnail.svg",
+  "controls": ["Mouse / Touch Drag", "WASD / Arrows", "Space", "PS5 DualSense"]
+}
