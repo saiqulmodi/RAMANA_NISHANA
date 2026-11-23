@@ -933,6 +933,8 @@
         state.wind = Math.max(-4.5, Math.min(4.5, state.wind));
         resetShotAim();
         banner.innerHTML += ' · <span class="text-cyan-300 font-semibold">Sights reset — re-aim for next shot!</span>';
+        resetShotAim();
+        banner.innerHTML += ' · <span class="text-cyan-300 font-semibold">Sights reset — re-aim for next shot!</span>';
 
         if (state.stageHits >= 5) {
           while (stuckGroup.children.length) stuckGroup.remove(stuckGroup.children[0]); spotterHits.length = 0; drawSpotterCard(); if (document.getElementById("spotter-last")) document.getElementById("spotter-last").textContent = "--"; if (document.getElementById("spotter-offset")) document.getElementById("spotter-offset").textContent = "Ready";
@@ -1144,7 +1146,7 @@
       document.getElementById('btn-reset').addEventListener('click', () => {
         while (stuckGroup.children.length) stuckGroup.remove(stuckGroup.children[0]); spotterHits.length = 0; drawSpotterCard(); if (document.getElementById("spotter-last")) document.getElementById("spotter-last").textContent = "--"; if (document.getElementById("spotter-offset")) document.getElementById("spotter-offset").textContent = "Ready";
         state.score = 0; state.shotNum = 1; state.stageHits = 0; state.totalHits = 0;
-        state.baseMaxShots = 5; state.maxShots = 5; state.mulliganUsed = false; state.distance = state.startDistance; resetShotAim();
+        state.baseMaxShots = 5; state.maxShots = 5; state.mulliganUsed = false; state.distance = state.startDistance; resetShotAim(); resetShotAim();
         drawSpotterCard(); updateUI();
       });
 
@@ -1163,8 +1165,8 @@
 
         // Keyboard fine aim (auto-scales to 0.002° precision ticks when 3.5x Scope is held)
         const kRate = state.scoped ? 0.12 : 3.6;
-        if (keys['KeyW'] || keys['ArrowUp']) { state.elevDeg = snap002(state.elevDeg + kRate * dt, -5, 26); shotAimAdjusted = true; document.getElementById('in-elev').value = state.elevDeg.toFixed(3); updateUI(); }
-        if (keys['KeyS'] || keys['ArrowDown']) { state.elevDeg = snap002(state.elevDeg - kRate * dt, -5, 26); shotAimAdjusted = true; document.getElementById('in-elev').value = state.elevDeg.toFixed(3); updateUI(); }
+        if (keys['KeyW'] || keys['ArrowUp']) { state.elevDeg = snap002(state.elevDeg + kRate * dt, -5, 26); shotAimAdjusted = true; shotAimAdjusted = true; document.getElementById('in-elev').value = state.elevDeg.toFixed(3); updateUI(); }
+        if (keys['KeyS'] || keys['ArrowDown']) { state.elevDeg = snap002(state.elevDeg - kRate * dt, -5, 26); shotAimAdjusted = true; shotAimAdjusted = true; document.getElementById('in-elev').value = state.elevDeg.toFixed(3); updateUI(); }
         if (keys['KeyA'] || keys['ArrowLeft']) { state.yawDeg = snap002(state.yawDeg - kRate * dt, -6, 6); document.getElementById('in-yaw').value = state.yawDeg.toFixed(3); updateUI(); }
         if (keys['KeyD'] || keys['ArrowRight']) { state.yawDeg = snap002(state.yawDeg + kRate * dt, -6, 6); document.getElementById('in-yaw').value = state.yawDeg.toFixed(3); updateUI(); }
 
