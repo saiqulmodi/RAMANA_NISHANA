@@ -274,6 +274,64 @@
       function triggerHaptic(ms = 30) {
         if (navigator.vibrate) navigator.vibrate(ms);
       }
+      function playPistolGunshot() {
+        if (state.muted) return;
+        initAudio();
+        const ctx = state.audioCtx;
+        if (!ctx) return;
+        const now = ctx.currentTime;
+
+        // Layer 1: Supersonic white-noise muzzle blast crack
+        const bufLen = Math.floor(ctx.sampleRate * 0.18);
+        const noiseBuf = ctx.createBuffer(1, bufLen, ctx.sampleRate);
+        const data = noiseBuf.getChannelData(0);
+        for (let i = 0; i < bufLen; i++) {
+          data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (ctx.sampleRate * 0.032));
+        }
+        const noise = ctx.createBufferSource();
+        noise.buffer = noiseBuf;
+
+        const filter = ctx.createBiquadFilter();
+        filter.type = 'bandpass';
+        filter.frequency.setValueAtTime(1950, now);
+        filter.frequency.exponentialRampToValueAtTime(380, now + 0.14);
+        filter.Q.value = 0.85;
+
+        const noiseGain = ctx.createGain();
+        noiseGain.gain.setValueAtTime(0.65, now);
+        noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.17);
+
+        noise.connect(filter);
+        filter.connect(noiseGain);
+        noiseGain.connect(ctx.destination);
+        noise.start(now);
+
+        // Layer 2: Low-end chamber punch (210 Hz -> 42 Hz)
+        const punchOsc = ctx.createOscillator();
+        const punchGain = ctx.createGain();
+        punchOsc.type = 'triangle';
+        punchOsc.frequency.setValueAtTime(215, now);
+        punchOsc.frequency.exponentialRampToValueAtTime(42, now + 0.11);
+        punchGain.gain.setValueAtTime(0.55, now);
+        punchGain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+        punchOsc.connect(punchGain);
+        punchGain.connect(ctx.destination);
+        punchOsc.start(now);
+        punchOsc.stop(now + 0.13);
+
+        // Layer 3: Steel slide blowback mechanical clack (+50 ms)
+        const slideOsc = ctx.createOscillator();
+        const slideGain = ctx.createGain();
+        slideOsc.type = 'square';
+        slideOsc.frequency.setValueAtTime(2950, now + 0.05);
+        slideOsc.frequency.exponentialRampToValueAtTime(1400, now + 0.09);
+        slideGain.gain.setValueAtTime(0.09, now + 0.05);
+        slideGain.gain.exponentialRampToValueAtTime(0.001, now + 0.095);
+        slideOsc.connect(slideGain);
+        slideGain.connect(ctx.destination);
+        slideOsc.start(now + 0.05);
+        slideOsc.stop(now + 0.10);
+      }
 
       // --- Three.js Scene, Renderer & High-Fidelity Lighting ---
       const scene = new THREE.Scene();
@@ -659,8 +717,7 @@
         if (GAME_MODE === 'pistol') {
           recoilTimer = 0.14;
           if (muzzleFlashMesh) muzzleFlashMesh.visible = true;
-          playTone(155, 0.09, 'sawtooth', 0.25);
-          playTone(540, 0.06, 'square', 0.14);
+          playPistolGunshot();
           const casing = new THREE.Mesh(
             new THREE.CylinderGeometry(0.005, 0.005, 0.022, 8),
             new THREE.MeshStandardMaterial({ color: 0xfbbf24, metalness: 0.9, roughness: 0.15 })
