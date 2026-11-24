@@ -12,44 +12,25 @@
     canvas { display: block; width: 100vw; height: 100vh; }
     input[type=range] { accent-color: #f59e0b; }
     #shot-banner:empty { display: none; }
+    #side-rail { scrollbar-width: none; }
+    #side-rail::-webkit-scrollbar { display: none; }
+    #side-rail > button, #side-rail > select { width: 100%; flex: 0 0 auto; min-height: 2.25rem; padding: 0.25rem 0; border-radius: 0.75rem; font-size: 0.8rem; text-align: center; text-align-last: center; line-height: 1.1; }
+    #side-rail > select { -webkit-appearance: none; appearance: none; font-size: 0.65rem; }
   </style>
 </head>
 <body class="text-slate-100 font-sans antialiased">
 
   <!-- Top Tournament HUD -->
-  <header class="fixed top-0 inset-x-0 z-30 pointer-events-none px-2.5 pt-2">
+  <header class="fixed top-0 inset-x-0 z-30 pointer-events-none pl-[4.25rem] pr-2.5 pt-2">
     <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-1.5 bg-slate-950/80 backdrop-blur-md border border-slate-700/60 rounded-2xl px-3 py-1.5 shadow-xl pointer-events-auto">
       <div class="flex flex-wrap items-center gap-1.5">
                 <span id="hud-stage" class="text-xs px-2 py-0.5 rounded-full bg-cyan-500/20 border border-cyan-400/40 text-cyan-200 font-bold tabular-nums">🎯1 · 70m</span>
         <span id="hud-shots" class="text-xs px-2 py-0.5 rounded-full bg-slate-800 border border-slate-600/60 text-slate-200 font-semibold tabular-nums">🔫1/5</span>
         <span id="hud-target-motion" class="text-xs px-2 py-0.5 rounded-full bg-slate-800 border border-slate-600/50 text-slate-300 font-semibold tabular-nums">⏺</span>
-      </div>
 
-      <div class="flex flex-wrap items-center gap-1.5">
         <span id="hud-score" class="text-xs px-2.5 py-0.5 rounded-full bg-amber-500/20 border border-amber-400/50 text-amber-200 font-extrabold tabular-nums">⭐0</span>
         <span id="hud-best" class="text-xs px-2 py-0.5 rounded-full bg-slate-800 border border-slate-600/60 text-slate-300 font-semibold tabular-nums">🏆0</span>
         <span id="hud-streak" class="text-xs px-2 py-0.5 rounded-full bg-orange-950/90 border border-orange-400/50 text-orange-200 font-semibold tabular-nums">📅1d</span>
-        <select id="sel-target-mode" aria-label="Target Movement Mode" class="text-xs px-2.5 py-0.5 rounded-full bg-slate-800 hover:bg-slate-700 border border-cyan-500/50 text-cyan-100 font-bold cursor-pointer focus:outline-none focus:ring-1 focus:ring-cyan-400">
-          <option value="stationary" class="bg-slate-900 text-slate-100">⏺ 1.00×</option>
-          <option value="moving" class="bg-slate-900 text-amber-300">↔ 1.25×</option>
-          <option value="pendulum" class="bg-slate-900 text-purple-300">〰 1.50×</option>
-          <option value="five_line" class="bg-slate-900 text-emerald-300">⋯5 1.75×</option>
-        </select>
-                                <button id="btn-dope" type="button" title="Ballistic Holdover & Windage DOPE Card" class="text-xs px-2.5 py-0.5 rounded-full bg-teal-500/20 hover:bg-teal-500/35 border border-teal-400/50 text-teal-200 font-bold cursor-pointer">📋</button>
-        <button id="btn-2p" type="button" title="Toggle 1-Player vs 2-Player Pass-and-Play Match" class="text-xs px-2.5 py-0.5 rounded-full bg-pink-500/20 hover:bg-pink-500/35 border border-pink-400/50 text-pink-200 font-bold cursor-pointer">👤</button>
-        <button id="pill-bulletcam" type="button" title="Toggle Slow-Motion Bullet/Arrow Flight Cam (Key B)" class="text-xs px-2.5 py-0.5 rounded-full bg-indigo-500/20 hover:bg-indigo-500/35 border border-indigo-400/60 text-indigo-200 font-bold cursor-pointer transition">🎬</button>
-        <button id="pill-replay" type="button" title="Replay Last Shot Travel Path in Slow Motion (Key R)" class="text-xs px-2.5 py-0.5 rounded-full bg-slate-800 hover:bg-slate-700 border border-slate-500/60 text-slate-200 font-bold cursor-pointer transition disabled:opacity-40" disabled>↺</button>
-        <button id="pill-drishti" type="button" title="Divya Drishti: Slow-Mo Target + Wide Sweet Spot (Key 1)" class="text-xs px-2.5 py-0.5 rounded-full bg-amber-500/20 hover:bg-amber-500/35 border border-amber-400/60 text-amber-200 font-bold cursor-pointer transition">👁 1</button>
-        <button id="pill-vayu" type="button" title="Vayu Stambhana: Zero Wind Drift for 2 Shots (Key 2)" class="text-xs px-2.5 py-0.5 rounded-full bg-cyan-500/20 hover:bg-cyan-500/35 border border-cyan-400/60 text-cyan-200 font-bold cursor-pointer transition">🌪 1</button>
-        <button id="pill-agni" type="button" title="Agni Astra: 2.0x Solar Score Multiplier Next Shot (Key 3)" class="text-xs px-2.5 py-0.5 rounded-full bg-orange-500/20 hover:bg-orange-500/35 border border-orange-400/60 text-orange-200 font-bold cursor-pointer transition">🔥 1</button>
-        <button id="btn-armory" type="button" class="text-xs px-2.5 py-0.5 rounded-full bg-purple-500/20 hover:bg-purple-500/30 border border-purple-400/50 text-purple-200 font-semibold cursor-pointer">🔫 1/4</button>
-        <button id="btn-daily" type="button" class="text-xs px-2.5 py-0.5 rounded-full bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-400/50 text-cyan-200 font-semibold cursor-pointer">🏟</button>
-        <button id="btn-mulligan" type="button" class="text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-400/50 text-emerald-200 font-semibold cursor-pointer">➕1</button>
-        <button id="btn-lb" type="button" class="text-xs px-2.5 py-0.5 rounded-full bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/50 text-amber-200 font-semibold cursor-pointer">🏅</button>
-        <button id="btn-mute" type="button" class="text-xs px-2.5 py-0.5 rounded-full bg-slate-800 hover:bg-slate-700 border border-slate-600/60 text-slate-200 font-semibold cursor-pointer">🔊</button>
-        <button id="btn-test-av" type="button" class="text-xs px-2.5 py-0.5 rounded-full bg-slate-800 hover:bg-slate-700 border border-slate-600/60 text-cyan-200 font-semibold cursor-pointer">🎵</button>
-        <button id="btn-guide" type="button" class="text-xs px-2.5 py-0.5 rounded-full bg-sky-500/20 hover:bg-sky-500/30 border border-sky-400/50 text-sky-200 font-semibold cursor-pointer">?</button>
-        <button id="btn-reset" type="button" class="text-xs px-2.5 py-0.5 rounded-full bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold cursor-pointer">⟳</button>
       </div>
     </div>
 
@@ -83,6 +64,31 @@
       </div>
     </div>
   </header>
+
+  <!-- Left vertical control rail -->
+  <nav id="side-rail" class="fixed left-1.5 top-2 bottom-[4.5rem] sm:bottom-2 z-30 w-14 flex flex-col gap-1 overflow-y-auto bg-slate-950/80 backdrop-blur-md border border-slate-700/60 rounded-2xl p-1 shadow-xl">
+        <select id="sel-target-mode" aria-label="Target Movement Mode" class="text-xs px-2.5 py-0.5 rounded-full bg-slate-800 hover:bg-slate-700 border border-cyan-500/50 text-cyan-100 font-bold cursor-pointer focus:outline-none focus:ring-1 focus:ring-cyan-400">
+          <option value="stationary" class="bg-slate-900 text-slate-100">⏺ 1.00×</option>
+          <option value="moving" class="bg-slate-900 text-amber-300">↔ 1.25×</option>
+          <option value="pendulum" class="bg-slate-900 text-purple-300">〰 1.50×</option>
+          <option value="five_line" class="bg-slate-900 text-emerald-300">⋯5 1.75×</option>
+        </select>
+                                <button id="btn-dope" type="button" title="Ballistic Holdover & Windage DOPE Card" class="text-xs px-2.5 py-0.5 rounded-full bg-teal-500/20 hover:bg-teal-500/35 border border-teal-400/50 text-teal-200 font-bold cursor-pointer">📋</button>
+        <button id="btn-2p" type="button" title="Toggle 1-Player vs 2-Player Pass-and-Play Match" class="text-xs px-2.5 py-0.5 rounded-full bg-pink-500/20 hover:bg-pink-500/35 border border-pink-400/50 text-pink-200 font-bold cursor-pointer">👤</button>
+        <button id="pill-bulletcam" type="button" title="Toggle Slow-Motion Bullet/Arrow Flight Cam (Key B)" class="text-xs px-2.5 py-0.5 rounded-full bg-indigo-500/20 hover:bg-indigo-500/35 border border-indigo-400/60 text-indigo-200 font-bold cursor-pointer transition">🎬</button>
+        <button id="pill-replay" type="button" title="Replay Last Shot Travel Path in Slow Motion (Key R)" class="text-xs px-2.5 py-0.5 rounded-full bg-slate-800 hover:bg-slate-700 border border-slate-500/60 text-slate-200 font-bold cursor-pointer transition disabled:opacity-40" disabled>↺</button>
+        <button id="pill-drishti" type="button" title="Divya Drishti: Slow-Mo Target + Wide Sweet Spot (Key 1)" class="text-xs px-2.5 py-0.5 rounded-full bg-amber-500/20 hover:bg-amber-500/35 border border-amber-400/60 text-amber-200 font-bold cursor-pointer transition">👁 1</button>
+        <button id="pill-vayu" type="button" title="Vayu Stambhana: Zero Wind Drift for 2 Shots (Key 2)" class="text-xs px-2.5 py-0.5 rounded-full bg-cyan-500/20 hover:bg-cyan-500/35 border border-cyan-400/60 text-cyan-200 font-bold cursor-pointer transition">🌪 1</button>
+        <button id="pill-agni" type="button" title="Agni Astra: 2.0x Solar Score Multiplier Next Shot (Key 3)" class="text-xs px-2.5 py-0.5 rounded-full bg-orange-500/20 hover:bg-orange-500/35 border border-orange-400/60 text-orange-200 font-bold cursor-pointer transition">🔥 1</button>
+        <button id="btn-armory" type="button" class="text-xs px-2.5 py-0.5 rounded-full bg-purple-500/20 hover:bg-purple-500/30 border border-purple-400/50 text-purple-200 font-semibold cursor-pointer">🔫 1/4</button>
+        <button id="btn-daily" type="button" class="text-xs px-2.5 py-0.5 rounded-full bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-400/50 text-cyan-200 font-semibold cursor-pointer">🏟</button>
+        <button id="btn-mulligan" type="button" class="text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-400/50 text-emerald-200 font-semibold cursor-pointer">➕1</button>
+        <button id="btn-lb" type="button" class="text-xs px-2.5 py-0.5 rounded-full bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/50 text-amber-200 font-semibold cursor-pointer">🏅</button>
+        <button id="btn-mute" type="button" class="text-xs px-2.5 py-0.5 rounded-full bg-slate-800 hover:bg-slate-700 border border-slate-600/60 text-slate-200 font-semibold cursor-pointer">🔊</button>
+        <button id="btn-test-av" type="button" class="text-xs px-2.5 py-0.5 rounded-full bg-slate-800 hover:bg-slate-700 border border-slate-600/60 text-cyan-200 font-semibold cursor-pointer">🎵</button>
+        <button id="btn-guide" type="button" class="text-xs px-2.5 py-0.5 rounded-full bg-sky-500/20 hover:bg-sky-500/30 border border-sky-400/50 text-sky-200 font-semibold cursor-pointer">?</button>
+        <button id="btn-reset" type="button" class="text-xs px-2.5 py-0.5 rounded-full bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold cursor-pointer">⟳</button>
+  </nav>
 
   <!-- Center Rangefinder Scope Overlay -->
   <div id="scope-overlay" class="hidden fixed inset-0 z-20 pointer-events-none flex items-center justify-center">
