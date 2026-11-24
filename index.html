@@ -105,7 +105,8 @@
   </div>
 
   <!-- High-Precision Ballistic Micro-Adjustment Drawer (0.002° Resolution) -->
-  <aside class="fixed bottom-16 sm:bottom-3 right-2 sm:right-3 z-30 flex flex-col gap-1.5 w-64 sm:w-72 bg-slate-950/85 backdrop-blur-md border border-slate-700/70 rounded-2xl p-2.5 sm:p-3 text-xs shadow-2xl">
+  <button id="btn-sights" type="button" title="Sights" class="fixed bottom-[4.5rem] sm:bottom-3 right-2 sm:right-3 z-30 w-11 h-11 rounded-full bg-slate-950/85 backdrop-blur-md border border-cyan-400/60 text-xl shadow-2xl cursor-pointer">🎚</button>
+  <aside id="sight-drawer" class="fixed bottom-[7.5rem] sm:bottom-16 right-2 sm:right-3 z-30 hidden sm:flex flex-col gap-1.5 w-56 sm:w-72 bg-slate-950/85 backdrop-blur-md border border-slate-700/70 rounded-2xl p-2.5 sm:p-3 text-xs shadow-2xl">
     <div class="flex items-center justify-between">
       <span class="font-bold text-slate-200">↕</span>
       <span id="lbl-elev" class="font-mono font-bold text-emerald-300 tabular-nums">+1.400°</span>
@@ -136,7 +137,7 @@
     </div>
     <input id="in-weight" type="range" min="90" max="180" step="1" value="125" class="w-full cursor-pointer" />
 
-    <div class="flex gap-1.5 pt-1">
+    <div class="hidden sm:flex gap-1.5 pt-1">
       <button id="btn-scope-desk" type="button" class="flex-1 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-600 font-bold text-cyan-200 cursor-pointer">🔭</button>
       <button id="btn-fire-desk" type="button" class="flex-1 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold cursor-pointer">🔫</button>
     </div>
@@ -1346,6 +1347,14 @@
       });
 
       document.getElementById('btn-guide').addEventListener('click', () => document.getElementById('guide-modal').classList.remove('hidden'));
+      // Sight drawer folds away (folded on phones, open on laptops)
+      let sightsOpen = window.innerWidth >= 640;
+      document.getElementById('btn-sights').addEventListener('click', () => {
+        sightsOpen = !sightsOpen;
+        document.getElementById('sight-drawer').style.display = sightsOpen ? 'flex' : 'none';
+        document.getElementById('btn-sights').classList.toggle('ring-2', sightsOpen);
+      });
+
       document.getElementById('btn-close-guide').addEventListener('click', () => {
         document.getElementById('guide-modal').classList.add('hidden');
         localStorage.setItem(STORAGE_PREFIX + 'guide_seen', '1');
