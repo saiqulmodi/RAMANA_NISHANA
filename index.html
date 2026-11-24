@@ -967,7 +967,9 @@
         const cvs = document.getElementById('spotter-canvas');
         if (!cvs) return;
         const ctx = cvs.getContext('2d');
-        const cx = 110, cy = 110, maxR = 104;
+        // Target face (1.15 m) uses the inner 72 px; the dark band around it
+        // shows near-misses at their true spot instead of clipping them away.
+        const cx = 110, cy = 110, maxR = 72, edgeR = 100;
         ctx.clearRect(0, 0, 220, 220);
 
         const ringSpec = [
@@ -1002,10 +1004,12 @@
         // Plot every shot of the current stage (wide misses clamp to the edge)
         spotterHits.forEach((h, idx) => {
           const isLatest = idx === spotterHits.length - 1;
-          const normX = Math.max(-1.02, Math.min(1.02, h.dx / 1.15));
-          const normY = Math.max(-1.02, Math.min(1.02, h.dy / 1.15));
-          const px = cx + normX * maxR;
-          const py = cy - normY * maxR;
+          let ox = (h.dx / 1.15) * maxR;
+          let oy = (h.dy / 1.15) * maxR;
+          const dist = Math.hypot(ox, oy);
+          if (dist > edgeR) { ox *= edgeR / dist; oy *= edgeR / dist; } // far miss: whole dot on the rim, same direction
+          const px = cx + ox;
+          const py = cy - oy;
 
           if (isLatest) {
             ctx.beginPath();
