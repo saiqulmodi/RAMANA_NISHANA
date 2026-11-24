@@ -11,6 +11,7 @@
     html, body { margin: 0; padding: 0; overflow: hidden; background: #070d19; touch-action: none; user-select: none; }
     canvas { display: block; width: 100vw; height: 100vh; }
     input[type=range] { accent-color: #f59e0b; }
+    #shot-banner:empty { display: none; }
   </style>
 </head>
 <body class="text-slate-100 font-sans antialiased">
@@ -19,57 +20,66 @@
   <header class="fixed top-0 inset-x-0 z-30 pointer-events-none px-2.5 pt-2">
     <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-1.5 bg-slate-950/80 backdrop-blur-md border border-slate-700/60 rounded-2xl px-3 py-1.5 shadow-xl pointer-events-auto">
       <div class="flex flex-wrap items-center gap-1.5">
-        <span class="font-black tracking-wide text-sm sm:text-base text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-200 to-cyan-300">RAMANA_NISHANA</span>
-        <span id="hud-stage" class="text-xs px-2 py-0.5 rounded-full bg-cyan-500/20 border border-cyan-400/40 text-cyan-200 font-bold tabular-nums">Stage 1 · 70m</span>
-        <span id="hud-shots" class="text-xs px-2 py-0.5 rounded-full bg-slate-800 border border-slate-600/60 text-slate-200 font-semibold tabular-nums">Round 1/5</span>
-        <span id="hud-target-motion" class="text-xs px-2 py-0.5 rounded-full bg-slate-800 border border-slate-600/50 text-slate-300 font-semibold tabular-nums">Target: Static</span>
+                <span id="hud-stage" class="text-xs px-2 py-0.5 rounded-full bg-cyan-500/20 border border-cyan-400/40 text-cyan-200 font-bold tabular-nums">🎯1 · 70m</span>
+        <span id="hud-shots" class="text-xs px-2 py-0.5 rounded-full bg-slate-800 border border-slate-600/60 text-slate-200 font-semibold tabular-nums">🔫1/5</span>
+        <span id="hud-target-motion" class="text-xs px-2 py-0.5 rounded-full bg-slate-800 border border-slate-600/50 text-slate-300 font-semibold tabular-nums">⏺</span>
       </div>
 
       <div class="flex flex-wrap items-center gap-1.5">
-        <span id="hud-score" class="text-xs px-2.5 py-0.5 rounded-full bg-amber-500/20 border border-amber-400/50 text-amber-200 font-extrabold tabular-nums">Score: 0</span>
-        <span id="hud-best" class="text-xs px-2 py-0.5 rounded-full bg-slate-800 border border-slate-600/60 text-slate-300 font-semibold tabular-nums">Best: 0</span>
-        <span id="hud-streak" class="text-xs px-2 py-0.5 rounded-full bg-orange-950/90 border border-orange-400/50 text-orange-200 font-semibold tabular-nums">Streak: 1d</span>
+        <span id="hud-score" class="text-xs px-2.5 py-0.5 rounded-full bg-amber-500/20 border border-amber-400/50 text-amber-200 font-extrabold tabular-nums">⭐0</span>
+        <span id="hud-best" class="text-xs px-2 py-0.5 rounded-full bg-slate-800 border border-slate-600/60 text-slate-300 font-semibold tabular-nums">🏆0</span>
+        <span id="hud-streak" class="text-xs px-2 py-0.5 rounded-full bg-orange-950/90 border border-orange-400/50 text-orange-200 font-semibold tabular-nums">📅1d</span>
         <select id="sel-target-mode" aria-label="Target Movement Mode" class="text-xs px-2.5 py-0.5 rounded-full bg-slate-800 hover:bg-slate-700 border border-cyan-500/50 text-cyan-100 font-bold cursor-pointer focus:outline-none focus:ring-1 focus:ring-cyan-400">
-          <option value="stationary" class="bg-slate-900 text-slate-100">Target: Stationary (1.00×)</option>
-          <option value="moving" class="bg-slate-900 text-amber-300">Moving: Straight Rail (1.25×)</option>
-          <option value="pendulum" class="bg-slate-900 text-purple-300">Moving: Pendulum Arc (1.50×)</option>
-          <option value="five_line" class="bg-slate-900 text-emerald-300">5-Target Line: #1-#5 (1m · 1.75×)</option>
+          <option value="stationary" class="bg-slate-900 text-slate-100">⏺ 1.00×</option>
+          <option value="moving" class="bg-slate-900 text-amber-300">↔ 1.25×</option>
+          <option value="pendulum" class="bg-slate-900 text-purple-300">〰 1.50×</option>
+          <option value="five_line" class="bg-slate-900 text-emerald-300">⋯5 1.75×</option>
         </select>
-                                <button id="btn-dope" type="button" title="Ballistic Holdover & Windage DOPE Card" class="text-xs px-2.5 py-0.5 rounded-full bg-teal-500/20 hover:bg-teal-500/35 border border-teal-400/50 text-teal-200 font-bold cursor-pointer">📋 DOPE Card</button>
-        <button id="btn-2p" type="button" title="Toggle 1-Player vs 2-Player Pass-and-Play Match" class="text-xs px-2.5 py-0.5 rounded-full bg-pink-500/20 hover:bg-pink-500/35 border border-pink-400/50 text-pink-200 font-bold cursor-pointer">👤 1P Solo</button>
-        <button id="pill-bulletcam" type="button" title="Toggle Slow-Motion Bullet/Arrow Flight Cam (Key B)" class="text-xs px-2.5 py-0.5 rounded-full bg-indigo-500/20 hover:bg-indigo-500/35 border border-indigo-400/60 text-indigo-200 font-bold cursor-pointer transition">🎬 Bullet Cam: OFF</button>
-        <button id="pill-replay" type="button" title="Replay Last Shot Travel Path in Slow Motion (Key R)" class="text-xs px-2.5 py-0.5 rounded-full bg-slate-800 hover:bg-slate-700 border border-slate-500/60 text-slate-200 font-bold cursor-pointer transition disabled:opacity-40" disabled>↺ Replay</button>
-        <button id="pill-drishti" type="button" title="Divya Drishti: Slow-Mo Target + Wide Sweet Spot (Key 1)" class="text-xs px-2.5 py-0.5 rounded-full bg-amber-500/20 hover:bg-amber-500/35 border border-amber-400/60 text-amber-200 font-bold cursor-pointer transition">👁 Divya Drishti (1)</button>
-        <button id="pill-vayu" type="button" title="Vayu Stambhana: Zero Wind Drift for 2 Shots (Key 2)" class="text-xs px-2.5 py-0.5 rounded-full bg-cyan-500/20 hover:bg-cyan-500/35 border border-cyan-400/60 text-cyan-200 font-bold cursor-pointer transition">🌪 Vayu Lock (1)</button>
-        <button id="pill-agni" type="button" title="Agni Astra: 2.0x Solar Score Multiplier Next Shot (Key 3)" class="text-xs px-2.5 py-0.5 rounded-full bg-orange-500/20 hover:bg-orange-500/35 border border-orange-400/60 text-orange-200 font-bold cursor-pointer transition">🔥 Agni 2× (1)</button>
-        <button id="btn-armory" type="button" class="text-xs px-2.5 py-0.5 rounded-full bg-purple-500/20 hover:bg-purple-500/30 border border-purple-400/50 text-purple-200 font-semibold cursor-pointer">Pistols (1/4)</button>
-        <button id="btn-daily" type="button" class="text-xs px-2.5 py-0.5 rounded-full bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-400/50 text-cyan-200 font-semibold cursor-pointer">Mode: Tournament</button>
-        <button id="btn-mulligan" type="button" class="text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-400/50 text-emerald-200 font-semibold cursor-pointer">+1 Round (1)</button>
-        <button id="btn-lb" type="button" class="text-xs px-2.5 py-0.5 rounded-full bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/50 text-amber-200 font-semibold cursor-pointer">Top 5</button>
-        <button id="btn-mute" type="button" class="text-xs px-2.5 py-0.5 rounded-full bg-slate-800 hover:bg-slate-700 border border-slate-600/60 text-slate-200 font-semibold cursor-pointer">Sound: ON</button>
-        <button id="btn-test-av" type="button" class="text-xs px-2.5 py-0.5 rounded-full bg-slate-800 hover:bg-slate-700 border border-slate-600/60 text-cyan-200 font-semibold cursor-pointer">Test Audio</button>
-        <button id="btn-guide" type="button" class="text-xs px-2.5 py-0.5 rounded-full bg-sky-500/20 hover:bg-sky-500/30 border border-sky-400/50 text-sky-200 font-semibold cursor-pointer">? Guide</button>
-        <button id="btn-reset" type="button" class="text-xs px-2.5 py-0.5 rounded-full bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold cursor-pointer">New Run</button>
+                                <button id="btn-dope" type="button" title="Ballistic Holdover & Windage DOPE Card" class="text-xs px-2.5 py-0.5 rounded-full bg-teal-500/20 hover:bg-teal-500/35 border border-teal-400/50 text-teal-200 font-bold cursor-pointer">📋</button>
+        <button id="btn-2p" type="button" title="Toggle 1-Player vs 2-Player Pass-and-Play Match" class="text-xs px-2.5 py-0.5 rounded-full bg-pink-500/20 hover:bg-pink-500/35 border border-pink-400/50 text-pink-200 font-bold cursor-pointer">👤</button>
+        <button id="pill-bulletcam" type="button" title="Toggle Slow-Motion Bullet/Arrow Flight Cam (Key B)" class="text-xs px-2.5 py-0.5 rounded-full bg-indigo-500/20 hover:bg-indigo-500/35 border border-indigo-400/60 text-indigo-200 font-bold cursor-pointer transition">🎬</button>
+        <button id="pill-replay" type="button" title="Replay Last Shot Travel Path in Slow Motion (Key R)" class="text-xs px-2.5 py-0.5 rounded-full bg-slate-800 hover:bg-slate-700 border border-slate-500/60 text-slate-200 font-bold cursor-pointer transition disabled:opacity-40" disabled>↺</button>
+        <button id="pill-drishti" type="button" title="Divya Drishti: Slow-Mo Target + Wide Sweet Spot (Key 1)" class="text-xs px-2.5 py-0.5 rounded-full bg-amber-500/20 hover:bg-amber-500/35 border border-amber-400/60 text-amber-200 font-bold cursor-pointer transition">👁 1</button>
+        <button id="pill-vayu" type="button" title="Vayu Stambhana: Zero Wind Drift for 2 Shots (Key 2)" class="text-xs px-2.5 py-0.5 rounded-full bg-cyan-500/20 hover:bg-cyan-500/35 border border-cyan-400/60 text-cyan-200 font-bold cursor-pointer transition">🌪 1</button>
+        <button id="pill-agni" type="button" title="Agni Astra: 2.0x Solar Score Multiplier Next Shot (Key 3)" class="text-xs px-2.5 py-0.5 rounded-full bg-orange-500/20 hover:bg-orange-500/35 border border-orange-400/60 text-orange-200 font-bold cursor-pointer transition">🔥 1</button>
+        <button id="btn-armory" type="button" class="text-xs px-2.5 py-0.5 rounded-full bg-purple-500/20 hover:bg-purple-500/30 border border-purple-400/50 text-purple-200 font-semibold cursor-pointer">🔫 1/4</button>
+        <button id="btn-daily" type="button" class="text-xs px-2.5 py-0.5 rounded-full bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-400/50 text-cyan-200 font-semibold cursor-pointer">🏟</button>
+        <button id="btn-mulligan" type="button" class="text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-400/50 text-emerald-200 font-semibold cursor-pointer">➕1</button>
+        <button id="btn-lb" type="button" class="text-xs px-2.5 py-0.5 rounded-full bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/50 text-amber-200 font-semibold cursor-pointer">🏅</button>
+        <button id="btn-mute" type="button" class="text-xs px-2.5 py-0.5 rounded-full bg-slate-800 hover:bg-slate-700 border border-slate-600/60 text-slate-200 font-semibold cursor-pointer">🔊</button>
+        <button id="btn-test-av" type="button" class="text-xs px-2.5 py-0.5 rounded-full bg-slate-800 hover:bg-slate-700 border border-slate-600/60 text-cyan-200 font-semibold cursor-pointer">🎵</button>
+        <button id="btn-guide" type="button" class="text-xs px-2.5 py-0.5 rounded-full bg-sky-500/20 hover:bg-sky-500/30 border border-sky-400/50 text-sky-200 font-semibold cursor-pointer">?</button>
+        <button id="btn-reset" type="button" class="text-xs px-2.5 py-0.5 rounded-full bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold cursor-pointer">⟳</button>
       </div>
     </div>
 
     <!-- Telemetry & Shot Feedback Banner -->
     <div class="max-w-7xl mx-auto mt-1.5 flex flex-wrap items-center justify-between gap-2 px-1">
-      <div id="shot-banner" class="text-xs px-3 py-1 rounded-xl bg-slate-950/75 backdrop-blur border border-slate-700/60 text-slate-200 shadow pointer-events-auto">
-        Drag viewport or use <b>WASD / Arrows</b> to aim · Hold <b>Space</b> (or touch button) for Gold Sweet Spot (+15%).
-      </div>
+      <div id="shot-banner" class="text-xs px-3 py-1 rounded-xl bg-slate-950/75 backdrop-blur border border-slate-700/60 text-slate-200 shadow pointer-events-auto"></div>
       <div class="flex items-center gap-2 text-xs px-3 py-1 rounded-xl bg-slate-950/75 backdrop-blur border border-slate-700/60 tabular-nums pointer-events-auto">
-        <span class="text-slate-400">Line Wind:</span>
+        <span class="text-slate-400">💨</span>
         <span id="hud-wind" class="font-bold text-cyan-300">+0.0 m/s →</span>
         <span class="text-slate-600">|</span>
-        <span class="text-slate-400">Downrange:</span>
+        <span class="text-slate-400">🌬</span>
         <span id="hud-wind-far" class="font-bold text-sky-300">+0.0 m/s →</span>
         <span class="text-slate-600">|</span>
-        <span class="text-slate-400">Elev (Up/Dn):</span>
+        <span class="text-slate-400">↕</span>
         <span id="hud-elev" class="font-bold text-emerald-300">+1.400°</span>
         <span class="text-slate-600">|</span>
-        <span class="text-slate-400">Windage (L/R):</span>
+        <span class="text-slate-400">↔</span>
         <span id="hud-yaw" class="font-bold text-amber-300">+0.000°</span>
+      </div>
+    </div>
+
+    <!-- Corner Zoom Target Spotter Card -->
+    <div class="max-w-7xl mx-auto mt-2 flex justify-start px-1">
+      <div class="pointer-events-auto bg-slate-950/85 backdrop-blur-md border border-cyan-400/45 rounded-2xl p-2 shadow-2xl flex flex-col items-center w-28 sm:w-36">
+        <div class="w-full flex items-center justify-between text-[10px] font-bold text-cyan-300 px-1 mb-1">
+          <span>🔍</span>
+          <span id="spotter-last" class="text-amber-300 tabular-nums">--</span>
+        </div>
+        <canvas id="spotter-canvas" width="220" height="220" class="w-24 h-24 sm:w-32 sm:h-32 rounded-full border border-slate-600/80 shadow-inner bg-slate-900"></canvas>
+        <div id="spotter-offset" class="mt-1 text-[10px] text-slate-300 font-mono tabular-nums">·</div>
       </div>
     </div>
   </header>
@@ -80,7 +90,7 @@
       <div class="absolute inset-x-0 h-px bg-cyan-400/40"></div>
       <div class="absolute inset-y-0 w-px bg-cyan-400/40"></div>
       <div class="w-3 h-3 rounded-full border border-rose-400"></div>
-      <span id="scope-readout" class="absolute bottom-5 text-[11px] font-bold px-2 py-0.5 rounded bg-slate-950/85 text-cyan-300 tabular-nums">3.5× OPTIC · 70m</span>
+      <span id="scope-readout" class="absolute bottom-5 text-[11px] font-bold px-2 py-0.5 rounded bg-slate-950/85 text-cyan-300 tabular-nums">3.5× · 70m</span>
     </div>
   </div>
 
@@ -97,7 +107,7 @@
   <!-- High-Precision Ballistic Micro-Adjustment Drawer (0.002° Resolution) -->
   <aside class="fixed bottom-16 sm:bottom-3 right-2 sm:right-3 z-30 flex flex-col gap-1.5 w-64 sm:w-72 bg-slate-950/85 backdrop-blur-md border border-slate-700/70 rounded-2xl p-2.5 sm:p-3 text-xs shadow-2xl">
     <div class="flex items-center justify-between">
-      <span class="font-bold text-slate-200">Elevation (Up + / Down −)</span>
+      <span class="font-bold text-slate-200">↕</span>
       <span id="lbl-elev" class="font-mono font-bold text-emerald-300 tabular-nums">+1.400°</span>
     </div>
     <div class="grid grid-cols-4 gap-1">
@@ -109,7 +119,7 @@
     <input id="in-elev" type="range" min="-5.000" max="26.000" step="0.002" value="1.400" class="w-full cursor-pointer" />
 
     <div class="flex items-center justify-between mt-0.5">
-      <span class="font-bold text-slate-200">Windage (Left − / Right +)</span>
+      <span class="font-bold text-slate-200">↔</span>
       <span id="lbl-yaw" class="font-mono font-bold text-amber-300 tabular-nums">+0.000°</span>
     </div>
     <div class="grid grid-cols-4 gap-1">
@@ -121,43 +131,36 @@
     <input id="in-yaw" type="range" min="-12.000" max="12.000" step="0.002" value="0.000" class="w-full cursor-pointer" />
 
     <div class="flex items-center justify-between">
-      <span class="font-bold text-slate-300">Bullet Grain</span>
+      <span class="font-bold text-slate-300">⚖</span>
       <span id="lbl-weight" class="font-mono text-cyan-300">125 gr</span>
     </div>
     <input id="in-weight" type="range" min="90" max="180" step="1" value="125" class="w-full cursor-pointer" />
 
     <div class="flex gap-1.5 pt-1">
-      <button id="btn-scope-desk" type="button" class="flex-1 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-600 font-bold text-cyan-200 cursor-pointer">Hold Scope (Shift)</button>
-      <button id="btn-fire-desk" type="button" class="flex-1 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold cursor-pointer">Fire Pistol</button>
+      <button id="btn-scope-desk" type="button" class="flex-1 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-600 font-bold text-cyan-200 cursor-pointer">🔭</button>
+      <button id="btn-fire-desk" type="button" class="flex-1 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold cursor-pointer">🔫</button>
     </div>
   </aside>
 
   <!-- Mobile 1-Thumb Touch Action Bar -->
   <div id="mobile-touch-bar" class="sm:hidden fixed bottom-2 inset-x-2 z-30 flex items-center gap-1.5 bg-slate-950/85 backdrop-blur-md border border-slate-700/70 rounded-2xl p-1.5 shadow-2xl">
-    <button id="btn-touch-scope" type="button" class="flex-1 py-2.5 px-2 rounded-xl bg-slate-800 active:bg-slate-700 border border-cyan-500/40 text-xs font-bold text-cyan-200 touch-none">Scope 3.5×</button>
-    <button id="btn-touch-draw" type="button" class="flex-[1.5] py-2.5 px-3 rounded-xl bg-amber-400 active:bg-amber-300 text-xs font-black text-slate-950 uppercase tracking-wide shadow-lg touch-none">Hold &amp; Fire Pistol</button>
+    <button id="btn-touch-scope" type="button" class="flex-1 py-2.5 px-2 rounded-xl bg-slate-800 active:bg-slate-700 border border-cyan-500/40 text-xs font-bold text-cyan-200 touch-none">🔭</button>
+    <button id="btn-touch-draw" type="button" class="flex-[1.5] py-2.5 px-3 rounded-xl bg-amber-400 active:bg-amber-300 text-xs font-black text-slate-950 uppercase tracking-wide shadow-lg touch-none">🔫</button>
     <button id="btn-touch-mulligan" type="button" class="py-2.5 px-2.5 rounded-xl bg-emerald-900/90 active:bg-emerald-700 border border-emerald-400/50 text-xs font-extrabold text-emerald-200 touch-none">+1</button>
   </div>
 
   <!-- Quick Aim Guide Modal -->
   <div id="guide-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 backdrop-blur-sm p-4">
     <div class="w-full max-w-md rounded-2xl bg-slate-900 border border-cyan-400/50 shadow-2xl p-5 text-slate-100">
-      <h2 class="text-lg font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-300 to-cyan-300">RAMANA_NISHANA Quick Aim Guide</h2>
-      <div class="mt-3 space-y-2.5 text-xs text-slate-300">
-        <div class="p-2.5 rounded-xl bg-slate-800/80 border border-slate-700">
-          <div class="font-bold text-cyan-300">1. Aim &amp; Optical Scope (3.5×)</div>
-          <p class="mt-0.5">Drag anywhere on the 3D field (or use <b>WASD / Arrows</b>) to align the trajectory arc against crosswind. Hold <b>Right-Click / Shift / Scope</b> to zoom 3.5×.</p>
-        </div>
-        <div class="p-2.5 rounded-xl bg-slate-800/80 border border-slate-700">
-          <div class="font-bold text-amber-300">2. Gold Sweet-Spot Release (+15% Score)</div>
-          <p class="mt-0.5">Hold <b>Space</b> (or slide your thumb on the gold mobile button) until the charge bar enters the <b>Gold Sweet Spot</b>, then release.</p>
-        </div>
-        <div class="p-2.5 rounded-xl bg-slate-800/80 border border-slate-700">
-          <div class="font-bold text-emerald-300">3. Clear 5 Hits → +25m Range &amp; Unlock Gear</div>
-          <p class="mt-0.5">Hit 5 shots per stage to advance +25m, earn +1 permanent reserve shot, and switch between <b>Stationary</b>, <b>Rail Move (1.25×)</b>, and <b>Pendulum (1.50×)</b>.</p>
-        </div>
+      <div class="grid grid-cols-3 gap-2 text-center text-sm font-bold text-slate-200">
+        <div class="p-2.5 rounded-xl bg-slate-800/80 border border-slate-700"><div class="text-2xl">✋</div>WASD ↕↔</div>
+        <div class="p-2.5 rounded-xl bg-slate-800/80 border border-slate-700"><div class="text-2xl">🔭</div>⇧ 3.5×</div>
+        <div class="p-2.5 rounded-xl bg-slate-800/80 border border-slate-700"><div class="text-2xl">🔫</div>␣ 🟡</div>
+        <div class="p-2.5 rounded-xl bg-slate-800/80 border border-slate-700"><div class="text-2xl">🎯</div>5 → +25m</div>
+        <div class="p-2.5 rounded-xl bg-slate-800/80 border border-slate-700"><div class="text-2xl">🎬</div>B · R</div>
+        <div class="p-2.5 rounded-xl bg-slate-800/80 border border-slate-700"><div class="text-2xl">👁🌪🔥</div>1 2 3</div>
       </div>
-      <button id="btn-close-guide" type="button" class="mt-4 w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-cyan-400 text-slate-950 font-black text-sm cursor-pointer">Enter Range</button>
+      <button id="btn-close-guide" type="button" class="mt-4 w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-cyan-400 text-slate-950 font-black text-xl cursor-pointer">▶</button>
     </div>
   </div>
 
@@ -224,8 +227,7 @@
           <tbody id="dope-tbody" class="divide-y divide-slate-800/80 text-slate-200 font-mono"></tbody>
         </table>
       </div>
-      <p class="mt-3 text-[11px] text-slate-400">Tip: Values assume a 100% full draw/charge. Dial exact <span class="text-cyan-300 font-bold">0.002°</span> clicks using the bottom-right micro-adjuster.</p>
-    </div>
+          </div>
   </div>
 
   <div id="canvas-wrap"></div>
@@ -325,7 +327,7 @@
       scene.background = new THREE.Color(0x0b172a);
       scene.fog = new THREE.FogExp2(0x0b172a, 0.0032);
 
-      const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 600);
+      const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.05, 600);
       camera.position.set(0, 1.62, 0.35);
 
       const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
@@ -471,17 +473,43 @@
       });
 
       const targetTex = new THREE.CanvasTexture(boardCanvas);
+      targetTex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+      // Target face: double-sided + self-lit by its own ring colours so grazing sun never darkens the scoring zones
+      function makeTargetFaceMat() {
+        return new THREE.MeshStandardMaterial({
+          map: targetTex, roughness: 0.45, side: THREE.DoubleSide,
+          emissive: 0xffffff, emissiveMap: targetTex, emissiveIntensity: 0.25
+        });
+      }
       const targetDisc = new THREE.Mesh(
         new THREE.CylinderGeometry(1.15, 1.15, 0.16, 40),
         [
           new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.8 }),
-          new THREE.MeshStandardMaterial({ map: targetTex, roughness: 0.45 }),
+          makeTargetFaceMat(),
           new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.8 })
         ]
       );
       targetDisc.rotation.x = Math.PI / 2;
       targetDisc.castShadow = true;
       targetGroup.add(targetDisc);
+
+      // Crisp scoring-ring boundary overlays (10/8/6/4/2 edges), each stepped +0.005 forward with polygonOffset -> no Z-fighting
+      function addScoringRingOverlays(parent, outerR, faceZ) {
+        [0.23, 0.46, 0.69, 0.92, 1.15].forEach((r, i) => {
+          const rr = r * outerR / 1.15;
+          const w = Math.max(0.012, 0.026 * outerR / 1.15);
+          const ringMesh = new THREE.Mesh(
+            new THREE.RingGeometry(Math.max(0.001, rr - w), rr, 64),
+            new THREE.MeshBasicMaterial({
+              color: 0x22d3ee, side: THREE.DoubleSide,
+              polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1
+            })
+          );
+          ringMesh.position.z = faceZ + 0.005 * (i + 1);
+          parent.add(ringMesh);
+        });
+      }
+      addScoringRingOverlays(targetGroup, 1.15, 0.08);
 
       // Tripod Stand Legs
       [-0.75, 0.75].forEach(lx => {
@@ -552,13 +580,14 @@
           new THREE.CylinderGeometry(0.44, 0.44, 0.14, 32),
           [
             new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.8 }),
-            new THREE.MeshStandardMaterial({ map: targetTex, roughness: 0.45 }),
+            makeTargetFaceMat(),
             new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.8 })
           ]
         );
         disc.rotation.x = Math.PI / 2;
         disc.castShadow = true;
         unit.add(disc);
+        addScoringRingOverlays(unit, 0.44, 0.07);
 
         const halo = new THREE.Mesh(
           new THREE.RingGeometry(0.46, 0.52, 32),
@@ -595,6 +624,13 @@
       const weaponGroup = new THREE.Group();
       weaponGroup.position.set(0.36, 1.36, -0.62);
       weaponGroup.rotation.set(0.06, -0.38, 0.18); // ~22 deg oblique angle so full bow/pistol profile is clearly visible
+      // Shot origin stays at the original weapon point so ballistics, aim arc and drop maths are unchanged
+      const shotOrigin = weaponGroup.position.clone();
+      if (GAME_MODE === 'pistol') {
+        // Pistol view: bottom-centre of the screen, muzzle forward and clearly visible
+        weaponGroup.position.set(0.17, 1.37, -0.32);
+        weaponGroup.rotation.set(0, 0, 0); // muzzle straight at the target
+      }
       scene.add(weaponGroup);
 
       let bowLimbMesh = null, bowStringLine = null, nockedArrowGroup = null, pistolSlideMesh = null, muzzleFlashMesh = null;
@@ -606,43 +642,59 @@
       weaponGroup.add(weaponAura);
 
       if (GAME_MODE === 'pistol') {
+        // Readable gun-metal: lower metalness + emissive tint so edges/serrations/sights show without an environment map
+        const gunMat = (color) => new THREE.MeshStandardMaterial({ color, metalness: 0.45, roughness: 0.38, emissive: 0x161b24, emissiveIntensity: 0.3 });
         // Ergonomic Grip + Trigger Guard + Frame + Vented Blowback Slide + Holographic Red-Dot Optic
         const grip = new THREE.Mesh(
           new THREE.BoxGeometry(0.042, 0.15, 0.065),
-          new THREE.MeshStandardMaterial({ color: 0x451a03, roughness: 0.72 })
+          new THREE.MeshStandardMaterial({ color: 0x451a03, roughness: 0.72, emissive: 0x161b24, emissiveIntensity: 0.3 })
         );
         grip.position.set(0, -0.075, 0.055);
         grip.rotation.x = 0.26;
 
         const guardBottom = new THREE.Mesh(
           new THREE.BoxGeometry(0.016, 0.012, 0.065),
-          new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.85, roughness: 0.25 })
+          gunMat(0x1e293b)
         );
         guardBottom.position.set(0, -0.042, -0.005);
 
         const trigger = new THREE.Mesh(
           new THREE.BoxGeometry(0.008, 0.028, 0.012),
-          new THREE.MeshStandardMaterial({ color: 0xfacc15, metalness: 0.9, roughness: 0.2 })
+          gunMat(0xfacc15)
         );
         trigger.position.set(0, -0.022, 0.005);
         trigger.rotation.x = -0.25;
 
         const frame = new THREE.Mesh(
           new THREE.BoxGeometry(0.038, 0.028, 0.29),
-          new THREE.MeshStandardMaterial({ color: 0x0f172a, metalness: 0.85, roughness: 0.25 })
+          gunMat(0x0f172a)
         );
         frame.position.set(0, 0.004, -0.055);
 
         const barrel = new THREE.Mesh(
           new THREE.CylinderGeometry(0.012, 0.012, 0.31, 14),
-          new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.95, roughness: 0.15 })
+          gunMat(0x94a3b8)
         );
         barrel.rotation.x = Math.PI / 2;
         barrel.position.set(0, 0.036, -0.075);
 
+        // Bright steel muzzle tip + dark bore so the muzzle reads clearly in front of the slide
+        const muzzleCrown = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.0145, 0.0145, 0.03, 18),
+          new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.45, roughness: 0.3, emissive: 0x334155, emissiveIntensity: 0.4 })
+        );
+        muzzleCrown.rotation.x = Math.PI / 2;
+        muzzleCrown.position.set(0, 0.036, -0.215);
+        const muzzleBore = new THREE.Mesh(
+          new THREE.CircleGeometry(0.0065, 16),
+          new THREE.MeshBasicMaterial({ color: 0x020617, side: THREE.DoubleSide })
+        );
+        muzzleBore.position.set(0, 0.036, -0.2305);
+        weaponGroup.add(muzzleCrown, muzzleBore);
+
         pistolSlideMesh = new THREE.Mesh(
           new THREE.BoxGeometry(0.044, 0.042, 0.28),
-          new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.88, roughness: 0.2 })
+          gunMat(0x334155)
         );
         pistolSlideMesh.position.set(0, 0.036, -0.052);
 
@@ -654,7 +706,7 @@
 
         const opticHood = new THREE.Mesh(
           new THREE.BoxGeometry(0.038, 0.026, 0.052),
-          new THREE.MeshStandardMaterial({ color: 0x090d16, metalness: 0.9, roughness: 0.2 })
+          gunMat(0x090d16)
         );
         opticHood.position.set(0, 0.032, 0.022);
 
@@ -663,7 +715,23 @@
           new THREE.MeshBasicMaterial({ color: 0xef4444 })
         );
         redDot.position.set(0, 0.033, 0.022);
-        pistolSlideMesh.add(frontSight, opticHood, redDot);
+
+        // High-contrast sight dots: white dot on the green front post + rear notch sight with two white dots
+        const dotMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+        const frontDot = new THREE.Mesh(new THREE.SphereGeometry(0.0028, 10, 10), dotMat);
+        frontDot.position.set(0, 0.029, -0.117);
+        const rearSight = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.012, 0.01), gunMat(0x090d16));
+        rearSight.position.set(0, 0.027, 0.125);
+        const rearDotL = new THREE.Mesh(new THREE.SphereGeometry(0.0026, 10, 10), dotMat);
+        rearDotL.position.set(-0.009, 0.028, 0.131);
+        const rearDotR = rearDotL.clone();
+        rearDotR.position.x = 0.009;
+        pistolSlideMesh.add(frontSight, opticHood, redDot, frontDot, rearSight, rearDotL, rearDotR);
+
+        // Dedicated weapon light rides with the pistol so slide, sights and barrel always catch highlights
+        const weaponLight = new THREE.PointLight(0xffffff, 1.2, 3);
+        weaponLight.position.set(0.25, 0.35, 0.45);
+        weaponGroup.add(weaponLight);
 
         muzzleFlashMesh = new THREE.Mesh(
           new THREE.ConeGeometry(0.055, 0.18, 12),
@@ -776,9 +844,9 @@
         const posAttr = arcGeo.attributes.position;
         for (let i = 0; i < 36; i++) {
           const t = (i / 35) * tTotal;
-          const x = weaponGroup.position.x + vx0 * t + 0.5 * (state.wind * 0.65) * t * t;
-          const y = weaponGroup.position.y + vy0 * t - 0.5 * 9.81 * t * t;
-          const z = weaponGroup.position.z + vz0 * t;
+          const x = shotOrigin.x + vx0 * t + 0.5 * (state.wind * 0.65) * t * t;
+          const y = shotOrigin.y + vy0 * t - 0.5 * 9.81 * t * t;
+          const z = shotOrigin.z + vz0 * t;
           posAttr.setXYZ(i, x, Math.max(0.02, y), z);
         }
         posAttr.needsUpdate = true;
@@ -792,15 +860,15 @@
         if (pistolSlideMesh) pistolSlideMesh.material.color.setHex(eq.color);
         const unlockedCount = CATALOG.filter(x => x.req(state)).length;
         const btn = document.getElementById('btn-armory');
-        if (btn) btn.textContent = `Pistols (${unlockedCount}/4)`;
+        if (btn) btn.textContent = `🔫 ${unlockedCount}/4`;
       }
 
       function updateUI() {
         const stage = Math.max(1, Math.floor((state.distance - state.startDistance) / 25) + 1);
-        document.getElementById('hud-stage').textContent = `Stage ${stage} · ${state.distance}m`;
-        document.getElementById('hud-shots').textContent = `Round ${Math.min(state.shotNum, state.maxShots)}/${state.maxShots}`;
-        document.getElementById('hud-score').textContent = `Score: ${state.score.toLocaleString()}`;
-        document.getElementById('hud-best').textContent = `Best: ${state.best.toLocaleString()}`;
+        document.getElementById('hud-stage').textContent = `🎯${stage} · ${state.distance}m`;
+        document.getElementById('hud-shots').textContent = `🔫${Math.min(state.shotNum, state.maxShots)}/${state.maxShots}`;
+        document.getElementById('hud-score').textContent = `⭐${state.score.toLocaleString()}`;
+        document.getElementById('hud-best').textContent = `🏆${state.best.toLocaleString()}`;
         document.getElementById('hud-wind').textContent = `${state.wind >= 0 ? '+' : ''}${state.wind.toFixed(1)} m/s ${state.wind >= 0 ? '→' : '←'}`;
         const fmtDeg = v => `${v >= 0 ? '+' : ''}${v.toFixed(3)}°`;
         document.getElementById('hud-elev').textContent = fmtDeg(state.elevDeg);
@@ -808,15 +876,15 @@
         document.getElementById('lbl-elev').textContent = fmtDeg(state.elevDeg);
         document.getElementById('lbl-yaw').textContent = fmtDeg(state.yawDeg);
         const scRead = document.getElementById('scope-readout');
-        if (scRead) scRead.textContent = `3.5× OPTIC · ${state.distance}m · EL ${fmtDeg(state.elevDeg)} · AZ ${fmtDeg(state.yawDeg)}`;
+        if (scRead) scRead.textContent = `3.5× · ${state.distance}m · ↕${fmtDeg(state.elevDeg)} · ↔${fmtDeg(state.yawDeg)}`;
         document.getElementById('lbl-weight').textContent = GAME_MODE === 'pistol' ? `${state.weight} gr` : `${state.weight} lbs`;
-        document.getElementById('scope-readout').textContent = `3.5× OPTIC · ${state.distance}m`;
+        document.getElementById('scope-readout').textContent = `3.5× · ${state.distance}m`;
 
         const mSel = document.getElementById('sel-target-mode');
         if (mSel && mSel.value !== state.targetMode) mSel.value = state.targetMode;
 
         const mulBtn = document.getElementById('btn-mulligan');
-        mulBtn.textContent = state.mulliganUsed ? '+1 Used' : '+1 Round (1)';
+        mulBtn.textContent = state.mulliganUsed ? '✔' : '➕1';
         mulBtn.disabled = state.mulliganUsed;
 
         // Atmosphere shift by stage
@@ -849,7 +917,7 @@
         state.flying = true;
         state.runShots++;
         projMesh.visible = true;
-        projState.pos.copy(weaponGroup.position);
+        projState.pos.copy(shotOrigin);
         const v0 = launchVelocity() * (0.6 + charge * 0.45);
         const stanceJitterEl = shotAimAdjusted ? 0 : (Math.random() - 0.5) * 0.65;
         const stanceJitterYw = shotAimAdjusted ? 0 : (Math.random() - 0.5) * 0.65;
@@ -887,13 +955,86 @@
         document.getElementById('draw-hud').classList.add('hidden');
       }
 
+      const spotterHits = [];
+      function setSpotterText(last, off) {
+        const spLast = document.getElementById('spotter-last');
+        const spOff = document.getElementById('spotter-offset');
+        if (spLast) spLast.textContent = last;
+        if (spOff) spOff.textContent = off;
+      }
+      function drawSpotterCard() {
+        const cvs = document.getElementById('spotter-canvas');
+        if (!cvs) return;
+        const ctx = cvs.getContext('2d');
+        const cx = 110, cy = 110, maxR = 104;
+        ctx.clearRect(0, 0, 220, 220);
+
+        const ringSpec = [
+          { r: maxR,        fill: '#f8fafc', label: '2',  tCol: '#0f172a' },
+          { r: maxR * 0.80, fill: '#0f172a', label: '4',  tCol: '#f8fafc' },
+          { r: maxR * 0.60, fill: '#0284c7', label: '6',  tCol: '#ffffff' },
+          { r: maxR * 0.40, fill: '#dc2626', label: '8',  tCol: '#ffffff' },
+          { r: maxR * 0.20, fill: '#facc15', label: '10', tCol: '#0f172a' }
+        ];
+        ringSpec.forEach(rg => {
+          ctx.beginPath();
+          ctx.arc(cx, cy, rg.r, 0, Math.PI * 2);
+          ctx.fillStyle = rg.fill;
+          ctx.fill();
+          ctx.lineWidth = 1.5;
+          ctx.strokeStyle = '#334155';
+          ctx.stroke();
+          ctx.fillStyle = rg.tCol;
+          ctx.font = 'bold 11px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(rg.label, cx, rg.label === '10' ? cy : cy - rg.r + 10);
+        });
+
+        ctx.strokeStyle = 'rgba(15, 23, 42, 0.28)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(cx - maxR, cy); ctx.lineTo(cx + maxR, cy);
+        ctx.moveTo(cx, cy - maxR); ctx.lineTo(cx, cy + maxR);
+        ctx.stroke();
+
+        // Plot every shot of the current stage (wide misses clamp to the edge)
+        spotterHits.forEach((h, idx) => {
+          const isLatest = idx === spotterHits.length - 1;
+          const normX = Math.max(-1.02, Math.min(1.02, h.dx / 1.15));
+          const normY = Math.max(-1.02, Math.min(1.02, h.dy / 1.15));
+          const px = cx + normX * maxR;
+          const py = cy - normY * maxR;
+
+          if (isLatest) {
+            ctx.beginPath();
+            ctx.arc(px, py, 11, 0, Math.PI * 2);
+            ctx.fillStyle = h.pts === 10 ? 'rgba(250, 204, 21, 0.35)' : 'rgba(244, 63, 94, 0.35)';
+            ctx.fill();
+          }
+
+          ctx.beginPath();
+          ctx.arc(px, py, isLatest ? 5.5 : 4, 0, Math.PI * 2);
+          ctx.fillStyle = isLatest ? (h.pts === 10 ? '#16a34a' : '#f43f5e') : '#38bdf8';
+          ctx.fill();
+          ctx.lineWidth = 1.5;
+          ctx.strokeStyle = '#ffffff';
+          ctx.stroke();
+
+          ctx.fillStyle = '#ffffff';
+          ctx.font = 'bold 8px sans-serif';
+          ctx.fillText(String(idx + 1), px, py - 9);
+        });
+      }
+      drawSpotterCard();
+
       function resolveImpact(hitTarget) {
         if (bulletCam.replaying) {
           bulletCam.replaying = false;
           state.flying = false;
           projMesh.visible = false;
           camera.position.set(0, 1.62, 0.35);
-          document.getElementById('shot-banner').innerHTML = '<span class="text-indigo-300 font-bold">Replay Complete.</span> Adjust sights or press <b>R</b> to replay again.';
+          document.getElementById('shot-banner').innerHTML = '<span class="text-indigo-300 font-bold">↺ ✔</span>';
           return;
         }
         state.flying = false;
@@ -912,6 +1053,11 @@
           else if (r <= 0.69) ringPts = 6;
           else if (r <= 0.92) ringPts = 4;
           else if (r <= 1.15) ringPts = 2;
+
+          spotterHits.push({ dx, dy, pts: ringPts });
+          drawSpotterCard();
+          setSpotterText(ringPts > 0 ? `${ringPts} PTS` : 'MISS',
+            `${Math.abs(Math.round(dx * 100))}cm ${dx >= 0 ? 'R' : 'L'} · ${Math.abs(Math.round(dy * 100))}cm ${dy >= 0 ? 'H' : 'L'}`);
 
           if (ringPts > 0) {
             state.stageHits++;
@@ -941,16 +1087,19 @@
 
             playTone(ringPts === 10 ? 880 : 620, 0.2, 'triangle', 0.18);
             triggerHaptic(50);
-            banner.innerHTML = `<span class="text-amber-300 font-black">${ringPts === 10 ? 'BULLSEYE 10!' : ringPts + ' RING HIT!'}</span> +<b>${pts}</b> pts (${state.stageHits}/5 stage hits)`;
+            banner.innerHTML = `<span class="text-amber-300 font-black">${ringPts === 10 ? '🎯 10!' : '🎯 ' + ringPts}</span> +<b>${pts}</b> · ${state.stageHits}/5`;
           } else {
             state.streak = 0;
             playTone(130, 0.25, 'sawtooth', 0.14);
-            banner.innerHTML = `<span class="text-rose-400 font-bold">Wide Shot!</span> Missed target rings.`;
+            banner.innerHTML = `<span class="text-rose-400 font-bold">✖</span>`;
           }
         } else {
           state.streak = 0;
           playTone(120, 0.25, 'sawtooth', 0.14);
-          banner.innerHTML = `<span class="text-rose-400 font-bold">Ground Impact!</span> Adjust elevation or windage.`;
+          banner.innerHTML = `<span class="text-rose-400 font-bold">✖ ↓</span>`;
+          spotterHits.push({ dx: projState.pos.x - targetGroup.position.x, dy: -1.15, pts: 0 });
+          drawSpotterCard();
+          setSpotterText('LOW', 'Short / Low');
         }
 
         state.shotNum++;
@@ -959,10 +1108,11 @@
         astra.agniActive = false;
         updateAstraHud();
         resetShotAim();
-        banner.innerHTML += ' · <span class="text-cyan-300 font-semibold">Sights reset — re-aim for next shot!</span>';
+        banner.innerHTML += ' · <span class="text-cyan-300 font-semibold">⟲</span>';
 
         if (state.stageHits >= 5) {
           while (stuckGroup.children.length) stuckGroup.remove(stuckGroup.children[0]);
+          spotterHits.length = 0; drawSpotterCard(); setSpotterText('--', '·');
           state.stageHits = 0;
           state.shotNum = 1;
           state.baseMaxShots++;
@@ -978,18 +1128,19 @@
           playTone(523, 0.15, 'triangle', 0.16, 0);
           playTone(659, 0.15, 'triangle', 0.16, 0.12);
           playTone(784, 0.25, 'triangle', 0.18, 0.24);
-          banner.innerHTML = `<span class="text-emerald-300 font-black">STAGE ${stage} CLEARED (5/5)!</span> Advancing to <b>${state.distance}m</b> (+1 Reserve Shot)!`;
+          banner.innerHTML = `<span class="text-emerald-300 font-black">✔ 5/5</span> → <b>${state.distance}m</b> ➕1`;
         } else if (state.shotNum > state.maxShots) {
           saveLeaderboard(state.score, stage, state.distance);
           if (state.score > 0) {
             document.getElementById('sc-score').textContent = `${state.score.toLocaleString()} PTS`;
-            document.getElementById('sc-sub').textContent = `Stage ${stage} · ${state.distance}m`;
+            document.getElementById('sc-sub').textContent = `🎯${stage} · ${state.distance}m`;
             document.getElementById('sc-acc').textContent = `${Math.round((state.totalHits / Math.max(1, state.runShots)) * 100)}%`;
             document.getElementById('sc-bull').textContent = String(state.runBullseyes);
             document.getElementById('sc-str').textContent = `${state.runBestStreak}×`;
             document.getElementById('scorecard-modal').classList.remove('hidden');
           }
           while (stuckGroup.children.length) stuckGroup.remove(stuckGroup.children[0]);
+          spotterHits.length = 0; drawSpotterCard(); setSpotterText('--', '·');
           state.score = 0;
           state.shotNum = 1;
           state.stageHits = 0;
@@ -1002,7 +1153,7 @@
           state.runBullseyes = 0;
           state.runBestStreak = 0;
           state.distance = state.startDistance;
-          banner.innerHTML = `<span class="text-rose-400 font-bold">Stage Target Not Achieved!</span> Score reset to 0 · Back to <b>70m</b>.`;
+          banner.innerHTML = `<span class="text-rose-400 font-bold">✖</span> ⭐0 · <b>70m</b>`;
         }
         updateUI();
       }
@@ -1174,24 +1325,24 @@
         const d = new Date();
         if (state.dailyMode) {
           state.wind = Math.round(Math.sin(d.getFullYear() * 100 + d.getDate()) * 32) / 10;
-          e.target.textContent = 'Mode: Daily Challenge';
+          e.target.textContent = '📅';
         } else {
-          e.target.textContent = 'Mode: Tournament';
+          e.target.textContent = '🏟';
         }
         updateUI();
       });
 
       document.getElementById('btn-mute').addEventListener('click', e => {
         state.muted = !state.muted;
-        e.target.textContent = state.muted ? 'Sound: OFF' : 'Sound: ON';
+        e.target.textContent = state.muted ? '🔇' : '🔊';
       });
       document.getElementById('btn-test-av').addEventListener('click', e => {
         state.muted = false;
-        document.getElementById('btn-mute').textContent = 'Sound: ON';
+        document.getElementById('btn-mute').textContent = '🔊';
         playTone(660, 0.16, 'triangle', 0.18);
         triggerHaptic(80);
-        e.target.textContent = 'Audio OK!';
-        setTimeout(() => { e.target.textContent = 'Test Audio'; }, 1200);
+        e.target.textContent = '✔';
+        setTimeout(() => { e.target.textContent = '🎵'; }, 1200);
       });
 
       document.getElementById('btn-guide').addEventListener('click', () => document.getElementById('guide-modal').classList.remove('hidden'));
@@ -1199,13 +1350,10 @@
         document.getElementById('guide-modal').classList.add('hidden');
         localStorage.setItem(STORAGE_PREFIX + 'guide_seen', '1');
       });
-      if (!localStorage.getItem(STORAGE_PREFIX + 'guide_seen')) {
-        document.getElementById('guide-modal').classList.remove('hidden');
-      }
 
       document.getElementById('btn-copy-score').addEventListener('click', async e => {
         const txt = `${document.title} — ${document.getElementById('sc-score').textContent} (${document.getElementById('sc-sub').textContent}) · Play: ${SHARE_URL}`;
-        try { await navigator.clipboard.writeText(txt); e.target.textContent = 'Copied!'; } catch (err) {}
+        try { await navigator.clipboard.writeText(txt); e.target.textContent = '✔'; } catch (err) {}
       });
       document.getElementById('btn-close-sc').addEventListener('click', () => document.getElementById('scorecard-modal').classList.add('hidden'));
 
@@ -1245,19 +1393,19 @@
         const b2 = document.getElementById('pill-vayu');
         const b3 = document.getElementById('pill-agni');
         if (b1) {
-          b1.textContent = astra.drishtiTimer > 0 ? `👁 Drishti ${astra.drishtiTimer.toFixed(1)}s` : `👁 Divya Drishti (${astra.drishtiCharges})`;
+          b1.textContent = astra.drishtiTimer > 0 ? `👁 ${astra.drishtiTimer.toFixed(1)}s` : `👁 ${astra.drishtiCharges}`;
           b1.classList.toggle('ring-2', astra.drishtiTimer > 0);
           b1.classList.toggle('ring-amber-300', astra.drishtiTimer > 0);
           b1.disabled = astra.drishtiCharges <= 0 && astra.drishtiTimer <= 0;
         }
         if (b2) {
-          b2.textContent = astra.vayuShotsLeft > 0 ? `🌪 Vayu Active (${astra.vayuShotsLeft})` : `🌪 Vayu Lock (${astra.vayuCharges})`;
+          b2.textContent = astra.vayuShotsLeft > 0 ? `🌪 ✔${astra.vayuShotsLeft}` : `🌪 ${astra.vayuCharges}`;
           b2.classList.toggle('ring-2', astra.vayuShotsLeft > 0);
           b2.classList.toggle('ring-cyan-300', astra.vayuShotsLeft > 0);
           b2.disabled = astra.vayuCharges <= 0 && astra.vayuShotsLeft <= 0;
         }
         if (b3) {
-          b3.textContent = astra.agniActive ? '🔥 Agni ARMED (2×)' : `🔥 Agni 2× (${astra.agniCharges})`;
+          b3.textContent = astra.agniActive ? '🔥 ✔2×' : `🔥 ${astra.agniCharges}`;
           b3.classList.toggle('ring-2', astra.agniActive);
           b3.classList.toggle('ring-orange-400', astra.agniActive);
           b3.disabled = astra.agniCharges <= 0 && !astra.agniActive;
@@ -1271,7 +1419,7 @@
         playTone(528, 0.28, 'sine', 0.18, 0);
         playTone(792, 0.35, 'triangle', 0.15, 0.08);
         triggerDualRumble(70, 0.3, 0.5);
-        document.getElementById('shot-banner').innerHTML = '<span class="text-amber-300 font-black">DIVYA DRISHTI ACTIVE!</span> Target motion slowed 65% &amp; Sweet Spot widened for 6.5s!';
+        document.getElementById('shot-banner').innerHTML = '<span class="text-amber-300 font-black">👁 6.5s</span>';
         updateAstraHud();
       }
 
@@ -1283,7 +1431,7 @@
         playTone(432, 0.25, 'sine', 0.16, 0);
         playTone(648, 0.30, 'sine', 0.14, 0.07);
         triggerDualRumble(60, 0.25, 0.4);
-        document.getElementById('shot-banner').innerHTML = '<span class="text-cyan-300 font-black">VAYU STAMBHANA!</span> Crosswind locked at 0.0 m/s for your next 2 shots!';
+        document.getElementById('shot-banner').innerHTML = '<span class="text-cyan-300 font-black">🌪 0.0 m/s ×2</span>';
         updateAstraHud();
         updateUI();
       }
@@ -1295,7 +1443,7 @@
         playTone(320, 0.18, 'sawtooth', 0.16, 0);
         playTone(640, 0.26, 'triangle', 0.18, 0.06);
         triggerDualRumble(90, 0.5, 0.8);
-        document.getElementById('shot-banner').innerHTML = '<span class="text-orange-400 font-black">AGNI ASTRA ARMED!</span> Next hit earns 2.0× Solar Score Multiplier!';
+        document.getElementById('shot-banner').innerHTML = '<span class="text-orange-400 font-black">🔥 2×</span>';
         updateAstraHud();
       }
 
@@ -1315,7 +1463,7 @@
         trailPoints: []
       };
 
-      const maxTrailPts = 140;
+      const maxTrailPts = 2000;
       const trailPositions = new Float32Array(maxTrailPts * 3);
       const trailGeo = new THREE.BufferGeometry();
       trailGeo.setAttribute('position', new THREE.BufferAttribute(trailPositions, 3));
@@ -1324,6 +1472,9 @@
         trailGeo,
         new THREE.LineBasicMaterial({ color: 0xfacc15, transparent: true, opacity: 0.92 })
       );
+      // The line starts empty, so its auto bounding sphere is a point at the origin
+      // and the renderer culled the whole trail; always draw it instead.
+      trailLine.frustumCulled = false;
       scene.add(trailLine);
 
       function clearFlightTrail() {
@@ -1332,6 +1483,8 @@
       }
 
       function pushFlightTrailPoint(v) {
+        const lastPt = bulletCam.trailPoints[bulletCam.trailPoints.length - 1];
+        if (lastPt && lastPt.distanceToSquared(v) < 0.0025) return; // keep one point per 5 cm
         if (bulletCam.trailPoints.length >= maxTrailPts) bulletCam.trailPoints.shift();
         bulletCam.trailPoints.push(v.clone());
         const attr = trailGeo.attributes.position;
@@ -1347,7 +1500,7 @@
         bulletCam.enabled = !bulletCam.enabled;
         const btn = document.getElementById('pill-bulletcam');
         if (btn) {
-          btn.textContent = bulletCam.enabled ? '🎬 Bullet Cam: ON' : '🎬 Bullet Cam: OFF';
+          btn.textContent = bulletCam.enabled ? '🎬 ✔' : '🎬';
           btn.classList.toggle('ring-2', bulletCam.enabled);
           btn.classList.toggle('ring-indigo-300', bulletCam.enabled);
         }
@@ -1364,7 +1517,7 @@
         projState.pos.copy(s.startPos);
         projState.vel.copy(s.startVel);
         projState.replayWind = s.wind;
-        document.getElementById('shot-banner').innerHTML = '<span class="text-indigo-300 font-black">SLOW-MO TRAJECTORY REPLAY</span> — Tracing exact flight curve &amp; wind drift...';
+        document.getElementById('shot-banner').innerHTML = '<span class="text-indigo-300 font-black">↺ 🎬</span>';
       }
 
       document.getElementById('pill-bulletcam')?.addEventListener('click', toggleBulletCam);
@@ -1419,7 +1572,7 @@
         const ranges = [70, 95, 120, 145, 170, 195];
         tbody.innerHTML = ranges.map(d => {
           const tFlight = d / v0;
-          const dropM = 0.5 * 9.81 * tFlight * tFlight + (1.55 - weaponGroup.position.y);
+          const dropM = 0.5 * 9.81 * tFlight * tFlight + (1.55 - shotOrigin.y);
           const elevRad = Math.atan2(dropM, d);
           const elevDeg = snap002(THREE.MathUtils.radToDeg(elevRad), -5, 26);
           const effWind = (state.wind * 0.45 + state.windFar * 0.55);
@@ -1458,10 +1611,10 @@
         const btn = document.getElementById('btn-2p');
         if (!btn) return;
         if (!match2P.enabled) {
-          btn.textContent = '👤 1P Solo';
+          btn.textContent = '👤';
           btn.classList.remove('ring-2', 'ring-pink-400');
         } else {
-          btn.textContent = `👥 P${match2P.turn} Turn (${match2P.p1Score} vs ${match2P.p2Score})`;
+          btn.textContent = `👥 P${match2P.turn} · ${match2P.p1Score}:${match2P.p2Score}`;
           btn.classList.add('ring-2', 'ring-pink-400');
         }
       }
@@ -1479,8 +1632,8 @@
         update2PHud();
         updateUI();
         document.getElementById('shot-banner').innerHTML = match2P.enabled
-          ? '<span class="text-pink-300 font-black">2-PLAYER PASS &amp; PLAY STARTED!</span> Player 1 shoots first (5 shots each).'
-          : '<span class="text-slate-300 font-bold">Returned to 1-Player Tournament Mode.</span>';
+          ? '<span class="text-pink-300 font-black">👥 P1 ▶</span>'
+          : '<span class="text-slate-300 font-bold">👤</span>';
       });
       // --- Main 60 FPS Animation Loop ---
       let lastTs = performance.now();
@@ -1506,7 +1659,7 @@
           const hud = document.getElementById('draw-hud');
           hud.classList.remove('hidden');
           document.getElementById('draw-bar').style.width = `${pct}%`;
-          document.getElementById('draw-label').textContent = sweet ? `GOLD SWEET SPOT ${pct}% (+15%)` : `CHARGE ${pct}%`;
+          document.getElementById('draw-label').textContent = sweet ? `🟡 ${pct}%` : `${pct}%`;
           if (bowStringLine) {
             const pullZ = 0.26 + state.drawCharge * 0.26;
             const pts = bowStringLine.geometry.attributes.position;
@@ -1558,7 +1711,7 @@
           targetGroup.position.set(Math.sin(phase) * ampX, elevY, -state.distance + Math.cos(phase * 0.8) * ampZ);
           targetGroup.rotation.set(0, 0, 0);
           railGroup.position.set(0, 0, targetGroup.position.z);
-          mHud.textContent = `Rail Move: ${mmSec} mm/s (1.25×)`;
+          mHud.textContent = `↔ ${mmSec} mm/s`;
         } else if (state.targetMode === 'pendulum') {
           fiveLineGroup.visible = false;
           targetGroup.visible = true;
@@ -1574,14 +1727,14 @@
           targetGroup.position.set(sx, elevY + (1 - Math.cos(phase)) * 0.25, -state.distance + sz);
           targetGroup.rotation.z = -Math.sin(phase) * 0.22;
           gRod.position.set(sx * 0.5, 3.55, sz * 0.5);
-          mHud.textContent = `Pendulum: ${mmSec} mm/s (1.50×)`;
+          mHud.textContent = `〰 ${mmSec} mm/s`;
         } else if (state.targetMode === 'five_line') {
           railGroup.visible = false;
           gantryGroup.visible = false;
           targetGroup.visible = false;
           fiveLineGroup.visible = true;
           fiveLineGroup.position.set(0, elevY, -state.distance);
-          mHud.textContent = `5-Line: Hit #${activeLineIndex + 1} (1m · 1.75×)`;
+          mHud.textContent = `⋯ #${activeLineIndex + 1}`;
         } else {
           fiveLineGroup.visible = false;
           targetGroup.visible = true;
@@ -1589,7 +1742,7 @@
           gantryGroup.visible = false;
           targetGroup.position.set(0, elevY, -state.distance);
           targetGroup.rotation.set(0, 0, 0);
-          mHud.textContent = 'Target: Static';
+          mHud.textContent = '⏺';
         }
 
         // Pistol slide blowback & brass shell physics
