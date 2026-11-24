@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>RAMANA_NISHANA Pistol Range</title>
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230f172a'/%3E%3Ccircle cx='46' cy='20' r='13' fill='none' stroke='%2338bdf8' stroke-width='3'/%3E%3Ccircle cx='46' cy='20' r='7' fill='none' stroke='%23ef4444' stroke-width='3'/%3E%3Ccircle cx='46' cy='20' r='3' fill='%23facc15'/%3E%3Cpath d='M10 28 H36 V35 H22 L18 48 H11 L15 35 H10 Z' fill='%23cbd5e1'/%3E%3Crect x='21' y='23' width='8' height='5' rx='1' fill='%2338bdf8'/%3E%3Ccircle cx='25' cy='25.5' r='1.4' fill='%23ef4444'/%3E%3C/svg%3E" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230f172a'/%3E%3Ccircle cx='44' cy='20' r='14' fill='none' stroke='%2338bdf8' stroke-width='3'/%3E%3Ccircle cx='44' cy='20' r='8' fill='none' stroke='%23ef4444' stroke-width='3'/%3E%3Ccircle cx='44' cy='20' r='3.5' fill='%23facc15'/%3E%3Cpath d='M14 14 Q 34 32 14 50' fill='none' stroke='%23f59e0b' stroke-width='4.5' stroke-linecap='round'/%3E%3Cline x1='10' y1='46' x2='41' y2='22' stroke='%23fde047' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E" />
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" onerror="var s=document.createElement('script');s.src='https://unpkg.com/three@0.128.0/build/three.min.js';document.head.appendChild(s);"></script>
   <style>
@@ -66,22 +66,10 @@
         <span id="hud-wind-far" class="font-bold text-sky-300">+0.0 m/s →</span>
         <span class="text-slate-600">|</span>
         <span class="text-slate-400">Elev (Up/Dn):</span>
-        <span id="hud-elev" class="font-bold text-emerald-300">+6.500°</span>
+        <span id="hud-elev" class="font-bold text-emerald-300">+1.400°</span>
         <span class="text-slate-600">|</span>
         <span class="text-slate-400">Windage (L/R):</span>
         <span id="hud-yaw" class="font-bold text-amber-300">+0.000°</span>
-      </div>
-    </div>
-
-    <!-- Corner Zoom Target Spotter Card -->
-    <div class="max-w-7xl mx-auto mt-2 flex justify-start px-1">
-      <div class="pointer-events-auto bg-slate-950/85 backdrop-blur-md border border-cyan-400/45 rounded-2xl p-2 shadow-2xl flex flex-col items-center w-28 sm:w-36">
-        <div class="w-full flex items-center justify-between text-[10px] font-bold text-cyan-300 px-1 mb-1">
-          <span>SPOTTER ZOOM</span>
-          <span id="spotter-last" class="text-amber-300 tabular-nums">--</span>
-        </div>
-        <canvas id="spotter-canvas" width="220" height="220" class="w-24 h-24 sm:w-32 sm:h-32 rounded-full border border-slate-600/80 shadow-inner bg-slate-900"></canvas>
-        <div id="spotter-offset" class="mt-1 text-[10px] text-slate-300 font-mono tabular-nums">Ready</div>
       </div>
     </div>
   </header>
@@ -110,7 +98,7 @@
   <aside class="fixed bottom-16 sm:bottom-3 right-2 sm:right-3 z-30 flex flex-col gap-1.5 w-64 sm:w-72 bg-slate-950/85 backdrop-blur-md border border-slate-700/70 rounded-2xl p-2.5 sm:p-3 text-xs shadow-2xl">
     <div class="flex items-center justify-between">
       <span class="font-bold text-slate-200">Elevation (Up + / Down −)</span>
-      <span id="lbl-elev" class="font-mono font-bold text-emerald-300 tabular-nums">+6.500°</span>
+      <span id="lbl-elev" class="font-mono font-bold text-emerald-300 tabular-nums">+1.400°</span>
     </div>
     <div class="grid grid-cols-4 gap-1">
       <button type="button" data-adj="elev" data-delta="-0.050" class="py-1 rounded bg-slate-800 hover:bg-slate-700 border border-slate-600/70 font-mono text-[11px] text-rose-300 cursor-pointer">-0.050°</button>
@@ -330,98 +318,6 @@
       }
       function triggerHaptic(ms = 30) {
         if (navigator.vibrate) navigator.vibrate(ms);
-      }
-      function playPistolGunshot() {
-        if (state.muted) return;
-        initAudio();
-        const ctx = state.audioCtx;
-        if (!ctx) return;
-        const now = ctx.currentTime;
-
-        // Distinct ballistic acoustic profiles per pistol caliber (w1..w4)
-        const profiles = {
-          w1: { dur: 0.11, decay: 0.018, fStart: 2800, fEnd: 820, nGain: 0.42, pStart: 320, pEnd: 95,  pGain: 0.32, pDur: 0.07, slideFreq: 3400 }, // 10m Olympic Air Pistol (crisp pneumatic snap)
-          w2: { dur: 0.18, decay: 0.032, fStart: 1950, fEnd: 380, nGain: 0.65, pStart: 215, pEnd: 42,  pGain: 0.55, pDur: 0.12, slideFreq: 2950 }, // 9mm Match Tactical (sharp supersonic crack)
-          w3: { dur: 0.28, decay: 0.058, fStart: 1350, fEnd: 210, nGain: 0.85, pStart: 155, pEnd: 28,  pGain: 0.78, pDur: 0.19, slideFreq: 2300 }, // .357 Magnum Heavy (deep cannon boom)
-          w4: { dur: 0.24, decay: 0.046, fStart: 2200, fEnd: 310, nGain: 0.78, pStart: 185, pEnd: 34,  pGain: 0.70, pDur: 0.16, slideFreq: 3150 }  // Golden Sovereign Custom (compensated port crack)
-        };
-        const p = profiles[state.equippedId] || profiles.w2;
-
-        // Layer 1: Caliber-tuned white-noise muzzle blast
-        const bufLen = Math.floor(ctx.sampleRate * p.dur);
-        const noiseBuf = ctx.createBuffer(1, bufLen, ctx.sampleRate);
-        const data = noiseBuf.getChannelData(0);
-        for (let i = 0; i < bufLen; i++) {
-          data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (ctx.sampleRate * p.decay));
-        }
-        const noise = ctx.createBufferSource();
-        noise.buffer = noiseBuf;
-
-        const filter = ctx.createBiquadFilter();
-        filter.type = 'bandpass';
-        filter.frequency.setValueAtTime(p.fStart, now);
-        filter.frequency.exponentialRampToValueAtTime(p.fEnd, now + p.dur * 0.85);
-        filter.Q.value = 0.85;
-
-        const noiseGain = ctx.createGain();
-        noiseGain.gain.setValueAtTime(p.nGain, now);
-        noiseGain.gain.exponentialRampToValueAtTime(0.001, now + p.dur);
-
-        noise.connect(filter);
-        filter.connect(noiseGain);
-        noiseGain.connect(ctx.destination);
-        noise.start(now);
-
-        // Layer 2: Chamber sub-bass punch
-        const punchOsc = ctx.createOscillator();
-        const punchGain = ctx.createGain();
-        punchOsc.type = 'triangle';
-        punchOsc.frequency.setValueAtTime(p.pStart, now);
-        punchOsc.frequency.exponentialRampToValueAtTime(p.pEnd, now + p.pDur);
-        punchGain.gain.setValueAtTime(p.pGain, now);
-        punchGain.gain.exponentialRampToValueAtTime(0.001, now + p.pDur + 0.01);
-        punchOsc.connect(punchGain);
-        punchGain.connect(ctx.destination);
-        punchOsc.start(now);
-        punchOsc.stop(now + p.pDur + 0.02);
-
-        // Layer 3: Mechanical slide cycle clack
-        const slideOsc = ctx.createOscillator();
-        const slideGain = ctx.createGain();
-        slideOsc.type = 'square';
-        slideOsc.frequency.setValueAtTime(p.slideFreq, now + 0.048);
-        slideOsc.frequency.exponentialRampToValueAtTime(p.slideFreq * 0.48, now + 0.09);
-        slideGain.gain.setValueAtTime(0.09, now + 0.048);
-        slideGain.gain.exponentialRampToValueAtTime(0.001, now + 0.095);
-        slideOsc.connect(slideGain);
-        slideGain.connect(ctx.destination);
-        slideOsc.start(now + 0.048);
-        slideOsc.stop(now + 0.10);
-      }
-
-      function playSteelGongPing() {
-        if (state.muted) return;
-        initAudio();
-        const ctx = state.audioCtx;
-        if (!ctx) return;
-        const now = ctx.currentTime;
-        // Inharmonic steel-plate overtones (1380 Hz fundamental + 2190 Hz + 3410 Hz shimmer)
-        [
-          { f: 1380, g: 0.22, d: 0.65 },
-          { f: 2190, g: 0.14, d: 0.48 },
-          { f: 3410, g: 0.08, d: 0.30 }
-        ].forEach(h => {
-          const osc = ctx.createOscillator();
-          const gain = ctx.createGain();
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(h.f, now);
-          gain.gain.setValueAtTime(h.g, now);
-          gain.gain.exponentialRampToValueAtTime(0.0005, now + h.d);
-          osc.connect(gain);
-          gain.connect(ctx.destination);
-          osc.start(now);
-          osc.stop(now + h.d + 0.02);
-        });
       }
 
       // --- Three.js Scene, Renderer & High-Fidelity Lighting ---
@@ -973,7 +869,8 @@
         if (GAME_MODE === 'pistol') {
           recoilTimer = 0.14;
           if (muzzleFlashMesh) muzzleFlashMesh.visible = true;
-          playPistolGunshot();
+          playTone(155, 0.09, 'sawtooth', 0.25);
+          playTone(540, 0.06, 'square', 0.14);
           const casing = new THREE.Mesh(
             new THREE.CylinderGeometry(0.005, 0.005, 0.022, 8),
             new THREE.MeshStandardMaterial({ color: 0xfbbf24, metalness: 0.9, roughness: 0.15 })
@@ -988,73 +885,6 @@
         triggerHaptic(35);
         state.drawCharge = 0;
         document.getElementById('draw-hud').classList.add('hidden');
-      }
-
-      const spotterHits = [];
-      function drawSpotterCard() {
-        const cvs = document.getElementById('spotter-canvas');
-        if (!cvs) return;
-        const ctx = cvs.getContext('2d');
-        const cx = 110, cy = 110, maxR = 104;
-        ctx.clearRect(0, 0, 220, 220);
-
-        const ringSpec = [
-          { r: maxR,        fill: '#f8fafc', label: '2',  tCol: '#0f172a' },
-          { r: maxR * 0.80, fill: '#0f172a', label: '4',  tCol: '#f8fafc' },
-          { r: maxR * 0.60, fill: '#0284c7', label: '6',  tCol: '#ffffff' },
-          { r: maxR * 0.40, fill: '#dc2626', label: '8',  tCol: '#ffffff' },
-          { r: maxR * 0.20, fill: '#facc15', label: '10', tCol: '#0f172a' }
-        ];
-        ringSpec.forEach(rg => {
-          ctx.beginPath();
-          ctx.arc(cx, cy, rg.r, 0, Math.PI * 2);
-          ctx.fillStyle = rg.fill;
-          ctx.fill();
-          ctx.lineWidth = 1.5;
-          ctx.strokeStyle = '#334155';
-          ctx.stroke();
-          ctx.fillStyle = rg.tCol;
-          ctx.font = 'bold 11px sans-serif';
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-          ctx.fillText(rg.label, cx, rg.label === '10' ? cy : cy - rg.r + 10);
-        });
-
-        // Subtle crosshair ticks
-        ctx.strokeStyle = 'rgba(15, 23, 42, 0.28)';
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.moveTo(cx - maxR, cy); ctx.lineTo(cx + maxR, cy);
-        ctx.moveTo(cx, cy - maxR); ctx.lineTo(cx, cy + maxR);
-        ctx.stroke();
-
-        // Plot all shots in current stage (clamped to outer edge if wide miss)
-        spotterHits.forEach((h, idx) => {
-          const isLatest = idx === spotterHits.length - 1;
-          const normX = Math.max(-1.02, Math.min(1.02, h.dx / 1.15));
-          const normY = Math.max(-1.02, Math.min(1.02, h.dy / 1.15));
-          const px = cx + normX * maxR;
-          const py = cy - normY * maxR; // canvas Y is inverted vs 3D world Y
-
-          if (isLatest) {
-            ctx.beginPath();
-            ctx.arc(px, py, 11, 0, Math.PI * 2);
-            ctx.fillStyle = h.pts === 10 ? 'rgba(250, 204, 21, 0.35)' : 'rgba(244, 63, 94, 0.35)';
-            ctx.fill();
-          }
-
-          ctx.beginPath();
-          ctx.arc(px, py, isLatest ? 5.5 : 4, 0, Math.PI * 2);
-          ctx.fillStyle = isLatest ? (h.pts === 10 ? '#16a34a' : '#f43f5e') : '#38bdf8';
-          ctx.fill();
-          ctx.lineWidth = 1.5;
-          ctx.strokeStyle = '#ffffff';
-          ctx.stroke();
-
-          ctx.fillStyle = '#ffffff';
-          ctx.font = 'bold 8px sans-serif';
-          ctx.fillText(String(idx + 1), px, py - 9);
-        });
       }
 
       function resolveImpact(hitTarget) {
@@ -1073,42 +903,9 @@
         const stage = Math.max(1, Math.floor((state.distance - state.startDistance) / 25) + 1);
 
         if (hitTarget) {
-          let hitLaneLabel = '';
-          let dx = projState.pos.x - targetGroup.position.x;
-          let dy = projState.pos.y - targetGroup.position.y;
-          let radiusScale = 1.0;
-
-          if (state.targetMode === 'five_line') {
-            let bestT = fiveLineTargets[0];
-            let bestDist = Infinity;
-            fiveLineTargets.forEach(t => {
-              const d = Math.hypot(projState.pos.x - t.xOffset, projState.pos.y - fiveLineGroup.position.y);
-              if (d < bestDist) { bestDist = d; bestT = t; }
-            });
-            dx = projState.pos.x - bestT.xOffset;
-            dy = projState.pos.y - fiveLineGroup.position.y;
-            radiusScale = 0.44 / 1.15;
-            hitLaneLabel = bestT.index === activeLineIndex
-              ? ` [Target #${bestT.num} ACTIVE!]`
-              : ` [Target #${bestT.num}]`;
-            if (bestDist <= 0.44 && bestT.index === activeLineIndex) {
-              activeLineIndex = (activeLineIndex + 1) % 5;
-              refreshFiveLineHighlight();
-            }
-          }
-
-          const r = Math.hypot(dx, dy) / radiusScale;
-          const estRing = r <= 0.23 ? 10 : (r <= 0.46 ? 8 : (r <= 0.69 ? 6 : (r <= 0.92 ? 4 : (r <= 1.15 ? 2 : 0))));
-          spotterHits.push({ dx, dy, pts: estRing });
-          drawSpotterCard();
-          const spLast = document.getElementById('spotter-last');
-          const spOff = document.getElementById('spotter-offset');
-          if (spLast) spLast.textContent = estRing > 0 ? `${estRing} PTS` : 'MISS';
-          if (spOff) {
-            const hDir = dx >= 0 ? 'R' : 'L';
-            const vDir = dy >= 0 ? 'H' : 'L';
-            spOff.textContent = `${Math.abs(Math.round(dx * 100))}cm ${hDir} · ${Math.abs(Math.round(dy * 100))}cm ${vDir}`;
-          }
+          const dx = projState.pos.x - targetGroup.position.x;
+          const dy = projState.pos.y - targetGroup.position.y;
+          const r = Math.hypot(dx, dy);
           let ringPts = 0;
           if (r <= 0.23) ringPts = 10;
           else if (r <= 0.46) ringPts = 8;
@@ -1142,7 +939,7 @@
             stuckGroup.add(pin);
             spawnImpactShockwave(projState.pos, astra.agniActive);
 
-            if (ringPts === 10) { playSteelGongPing(); } else { playTone(620, 0.2, 'triangle', 0.18); }
+            playTone(ringPts === 10 ? 880 : 620, 0.2, 'triangle', 0.18);
             triggerHaptic(50);
             banner.innerHTML = `<span class="text-amber-300 font-black">${ringPts === 10 ? 'BULLSEYE 10!' : ringPts + ' RING HIT!'}</span> +<b>${pts}</b> pts (${state.stageHits}/5 stage hits)`;
           } else {
@@ -1154,12 +951,6 @@
           state.streak = 0;
           playTone(120, 0.25, 'sawtooth', 0.14);
           banner.innerHTML = `<span class="text-rose-400 font-bold">Ground Impact!</span> Adjust elevation or windage.`;
-          spotterHits.push({ dx: projState.pos.x - targetGroup.position.x, dy: -1.15, pts: 0 });
-          drawSpotterCard();
-          const spLastG = document.getElementById('spotter-last');
-          const spOffG = document.getElementById('spotter-offset');
-          if (spLastG) spLastG.textContent = 'LOW';
-          if (spOffG) spOffG.textContent = 'Short / Low';
         }
 
         state.shotNum++;
@@ -1169,13 +960,9 @@
         updateAstraHud();
         resetShotAim();
         banner.innerHTML += ' · <span class="text-cyan-300 font-semibold">Sights reset — re-aim for next shot!</span>';
-        resetShotAim();
-        banner.innerHTML += ' · <span class="text-cyan-300 font-semibold">Sights reset — re-aim for next shot!</span>';
-        resetShotAim();
-        banner.innerHTML += ' · <span class="text-cyan-300 font-semibold">Sights reset — re-aim for next shot!</span>';
 
         if (state.stageHits >= 5) {
-          while (stuckGroup.children.length) stuckGroup.remove(stuckGroup.children[0]); spotterHits.length = 0; drawSpotterCard(); if (document.getElementById("spotter-last")) document.getElementById("spotter-last").textContent = "--"; if (document.getElementById("spotter-offset")) document.getElementById("spotter-offset").textContent = "Ready";
+          while (stuckGroup.children.length) stuckGroup.remove(stuckGroup.children[0]);
           state.stageHits = 0;
           state.shotNum = 1;
           state.baseMaxShots++;
@@ -1202,7 +989,7 @@
             document.getElementById('sc-str').textContent = `${state.runBestStreak}×`;
             document.getElementById('scorecard-modal').classList.remove('hidden');
           }
-          while (stuckGroup.children.length) stuckGroup.remove(stuckGroup.children[0]); spotterHits.length = 0; drawSpotterCard(); if (document.getElementById("spotter-last")) document.getElementById("spotter-last").textContent = "--"; if (document.getElementById("spotter-offset")) document.getElementById("spotter-offset").textContent = "Ready";
+          while (stuckGroup.children.length) stuckGroup.remove(stuckGroup.children[0]);
           state.score = 0;
           state.shotNum = 1;
           state.stageHits = 0;
@@ -1217,7 +1004,7 @@
           state.distance = state.startDistance;
           banner.innerHTML = `<span class="text-rose-400 font-bold">Stage Target Not Achieved!</span> Score reset to 0 · Back to <b>70m</b>.`;
         }
-        drawSpotterCard(); updateUI();
+        updateUI();
       }
 
       function saveLeaderboard(sc, stg, dist) {
@@ -1247,13 +1034,51 @@
         if (e.button === 2) { state.scoped = true; document.getElementById('scope-overlay').classList.remove('hidden'); return; }
         dragStart = { x: e.clientX, y: e.clientY, el: state.elevDeg, yw: state.yawDeg };
       });
+      function snap002(val, minV, maxV) {
+        const clamped = Math.max(minV, Math.min(maxV, val));
+        return Math.round(clamped / 0.002) * 0.002;
+      }
+      let shotAimAdjusted = true;
+      function resetShotAim() {
+        const baseEl = GAME_MODE === 'pistol' ? 1.400 : 6.500;
+        const driftEl = (Math.random() - 0.5) * 0.48;
+        const driftYw = (Math.random() - 0.5) * 0.44;
+        state.elevDeg = snap002(baseEl + driftEl, -5, 26);
+        state.yawDeg = snap002(driftYw, -6, 6);
+        shotAimAdjusted = false;
+        const inEl = document.getElementById('in-elev');
+        const inYw = document.getElementById('in-yaw');
+        if (inEl) inEl.value = state.elevDeg.toFixed(3);
+        if (inYw) inYw.value = state.yawDeg.toFixed(3);
+      }
+      
+      
+
+      document.querySelectorAll('[data-adj]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const axis = btn.getAttribute('data-adj');
+          const delta = Number(btn.getAttribute('data-delta'));
+          if (axis === 'elev') {
+            state.elevDeg = snap002(state.elevDeg + delta, -5, 26);
+            shotAimAdjusted = true; shotAimAdjusted = true; shotAimAdjusted = true; document.getElementById('in-elev').value = state.elevDeg.toFixed(3);
+          } else {
+            state.yawDeg = snap002(state.yawDeg + delta, -12, 12);
+            document.getElementById('in-yaw').value = state.yawDeg.toFixed(3);
+          }
+          shotAimAdjusted = true; shotAimAdjusted = true; shotAimAdjusted = true; playTone(980, 0.025, 'sine', 0.06);
+          updateUI();
+        });
+      });
+
       window.addEventListener('pointermove', e => {
         if (!dragStart) return;
-        state.elevDeg = Math.max(0.5, Math.min(26, Math.round((dragStart.el - (e.clientY - dragStart.y) * 0.05) * 10) / 10));
-        state.yawDeg = Math.max(-6, Math.min(6, Math.round((dragStart.yw + (e.clientX - dragStart.x) * 0.03) * 10) / 10));
-        document.getElementById('in-elev').value = state.elevDeg;
-        document.getElementById('in-yaw').value = state.yawDeg;
-        drawSpotterCard(); updateUI();
+        // 3.5x Scope scales drag sensitivity down so 1px movement = 0.002° micro-correction
+        const sens = state.scoped ? 0.002 : 0.036;
+        state.elevDeg = snap002(dragStart.el - (e.clientY - dragStart.y) * sens, -5, 26);
+        state.yawDeg = snap002(dragStart.yw + (e.clientX - dragStart.x) * sens, -12, 12);
+        shotAimAdjusted = true; shotAimAdjusted = true; shotAimAdjusted = true; document.getElementById('in-elev').value = state.elevDeg.toFixed(3);
+        document.getElementById('in-yaw').value = state.yawDeg.toFixed(3);
+        updateUI();
       });
       window.addEventListener('pointerup', e => {
         if (e.button === 2) { state.scoped = false; document.getElementById('scope-overlay').classList.add('hidden'); }
@@ -1272,9 +1097,12 @@
       });
       touchDraw.addEventListener('pointermove', e => {
         if (!state.dragging || !tStart) return;
-        state.elevDeg = Math.max(0.5, Math.min(26, Math.round((tStart.el - (e.clientY - tStart.y) * 0.06) * 10) / 10));
-        state.yawDeg = Math.max(-6, Math.min(6, Math.round((tStart.yw + (e.clientX - tStart.x) * 0.04) * 10) / 10));
-        drawSpotterCard(); updateUI();
+        const sens = state.scoped ? 0.002 : 0.040;
+        state.elevDeg = snap002(tStart.el - (e.clientY - tStart.y) * sens, -5, 26);
+        state.yawDeg = snap002(tStart.yw + (e.clientX - tStart.x) * sens, -12, 12);
+        shotAimAdjusted = true; shotAimAdjusted = true; shotAimAdjusted = true; document.getElementById('in-elev').value = state.elevDeg.toFixed(3);
+        document.getElementById('in-yaw').value = state.yawDeg.toFixed(3);
+        updateUI();
       });
       ['pointerup', 'pointercancel'].forEach(ev => touchDraw.addEventListener(ev, () => {
         tStart = null;
@@ -1293,11 +1121,10 @@
       deskScope.addEventListener('pointerdown', () => { state.scoped = true; document.getElementById('scope-overlay').classList.remove('hidden'); });
       ['pointerup', 'pointerleave'].forEach(ev => deskScope.addEventListener(ev, () => { state.scoped = false; document.getElementById('scope-overlay').classList.add('hidden'); }));
 
-      document.getElementById('btn-target-mode').addEventListener('click', () => {
-        const modes = ['stationary', 'moving', 'pendulum', 'five_line'];
-        state.targetMode = modes[(modes.indexOf(state.targetMode) + 1) % modes.length];
+      document.getElementById('sel-target-mode').addEventListener('change', e => {
+        state.targetMode = e.target.value;
         localStorage.setItem(STORAGE_PREFIX + 'target_mode', state.targetMode);
-        drawSpotterCard(); updateUI();
+        updateUI();
       });
 
       function useMulligan() {
@@ -1305,7 +1132,7 @@
         state.mulliganUsed = true;
         state.maxShots++;
         playTone(680, 0.15, 'triangle', 0.15);
-        drawSpotterCard(); updateUI();
+        updateUI();
       }
       document.getElementById('btn-mulligan').addEventListener('click', useMulligan);
       document.getElementById('btn-touch-mulligan').addEventListener('click', useMulligan);
@@ -1325,7 +1152,7 @@
         list.querySelectorAll('[data-wid]').forEach(b => b.addEventListener('click', () => {
           state.equippedId = b.getAttribute('data-wid');
           localStorage.setItem(STORAGE_PREFIX + 'equipped', state.equippedId);
-          drawSpotterCard(); updateUI();
+          updateUI();
           document.getElementById('armory-modal').classList.add('hidden');
         }));
         document.getElementById('armory-modal').classList.remove('hidden');
@@ -1351,7 +1178,7 @@
         } else {
           e.target.textContent = 'Mode: Tournament';
         }
-        drawSpotterCard(); updateUI();
+        updateUI();
       });
 
       document.getElementById('btn-mute').addEventListener('click', e => {
@@ -1383,10 +1210,10 @@
       document.getElementById('btn-close-sc').addEventListener('click', () => document.getElementById('scorecard-modal').classList.add('hidden'));
 
       document.getElementById('btn-reset').addEventListener('click', () => {
-        while (stuckGroup.children.length) stuckGroup.remove(stuckGroup.children[0]); spotterHits.length = 0; drawSpotterCard(); if (document.getElementById("spotter-last")) document.getElementById("spotter-last").textContent = "--"; if (document.getElementById("spotter-offset")) document.getElementById("spotter-offset").textContent = "Ready";
+        while (stuckGroup.children.length) stuckGroup.remove(stuckGroup.children[0]);
         state.score = 0; state.shotNum = 1; state.stageHits = 0; state.totalHits = 0;
         state.baseMaxShots = 5; state.maxShots = 5; state.mulliganUsed = false; state.distance = state.startDistance; resetShotAim(); resetAstrasForStage(); activeLineIndex = 0; refreshFiveLineHighlight(); resetShotAim(); resetShotAim();
-        drawSpotterCard(); updateUI();
+        updateUI();
       });
 
       window.addEventListener('resize', () => {
@@ -1834,9 +1661,11 @@
         renderer.render(scene, camera);
       }
 
-      drawSpotterCard(); updateUI();
+      updateUI();
       requestAnimationFrame(animate);
-$bootFooter
+      }
+      boot();
+    })();
   </script>
 </body>
 </html>
