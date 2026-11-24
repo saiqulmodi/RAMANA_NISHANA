@@ -145,15 +145,17 @@
 
     <div class="hidden sm:flex gap-1.5 pt-1">
       <button id="btn-scope-desk" type="button" class="flex-1 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-600 font-bold text-cyan-200 cursor-pointer">🔭</button>
-      <button id="btn-fire-desk" type="button" class="flex-1 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold cursor-pointer">🔫</button>
     </div>
   </aside>
+
+  <!-- Centre trigger (laptop); phones use the centred 🔫 in the bottom bar -->
+  <button id="btn-fire-desk" type="button" title="Fire (Space)" class="hidden sm:flex fixed bottom-4 left-1/2 -translate-x-1/2 z-30 w-16 h-16 items-center justify-center rounded-full bg-amber-400 hover:bg-amber-300 active:scale-95 text-2xl shadow-2xl border-4 border-slate-950/60 cursor-pointer">🔫</button>
 
   <!-- Mobile 1-Thumb Touch Action Bar -->
   <div id="mobile-touch-bar" class="sm:hidden fixed bottom-2 inset-x-2 z-30 flex items-center gap-1.5 bg-slate-950/85 backdrop-blur-md border border-slate-700/70 rounded-2xl p-1.5 shadow-2xl">
     <button id="btn-touch-scope" type="button" class="flex-1 py-2.5 px-2 rounded-xl bg-slate-800 active:bg-slate-700 border border-cyan-500/40 text-xs font-bold text-cyan-200 touch-none">🔭</button>
     <button id="btn-touch-draw" type="button" class="flex-[1.5] py-2.5 px-3 rounded-xl bg-amber-400 active:bg-amber-300 text-xs font-black text-slate-950 uppercase tracking-wide shadow-lg touch-none">🔫</button>
-    <button id="btn-touch-mulligan" type="button" class="py-2.5 px-2.5 rounded-xl bg-emerald-900/90 active:bg-emerald-700 border border-emerald-400/50 text-xs font-extrabold text-emerald-200 touch-none">+1</button>
+    <button id="btn-touch-mulligan" type="button" class="flex-1 py-2.5 px-2.5 rounded-xl bg-emerald-900/90 active:bg-emerald-700 border border-emerald-400/50 text-xs font-extrabold text-emerald-200 touch-none">+1</button>
   </div>
 
   <!-- Quick Aim Guide Modal -->
@@ -635,7 +637,7 @@
       const shotOrigin = weaponGroup.position.clone();
       if (GAME_MODE === 'pistol') {
         // Pistol view: bottom-centre of the screen, muzzle forward and clearly visible
-        weaponGroup.position.set(0.17, 1.37, -0.32);
+        weaponGroup.position.set(0, 1.37, -0.32);
         weaponGroup.rotation.set(0, 0, 0); // muzzle straight at the target
       }
       scene.add(weaponGroup);
