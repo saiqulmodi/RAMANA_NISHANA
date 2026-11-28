@@ -630,6 +630,9 @@
           t.badge.material.needsUpdate = true;
         });
       }
+      function clearFiveLinePins() {
+        fiveLineTargets.forEach(t => t.group.children.filter(c => c.userData.pin).forEach(c => t.group.remove(c)));
+      }
       // --- 3D Player Weapon angled at 22 deg for clear silhouette & profile ---
       const weaponGroup = new THREE.Group();
       weaponGroup.position.set(0.36, 1.36, -0.62);
@@ -1058,9 +1061,12 @@
         const stage = Math.max(1, Math.floor((state.distance - state.startDistance) / 25) + 1);
 
         if (hitTarget) {
-          const dx = projState.pos.x - targetGroup.position.x;
-          const dy = projState.pos.y - targetGroup.position.y;
-          const r = Math.hypot(dx, dy);
+          // 5-Target Line: score against the highlighted target; its 0.44 m face uses the same ring ratios
+          const lineT = state.targetMode === 'five_line' ? fiveLineTargets[activeLineIndex] : null;
+          const ringScale = lineT ? 0.44 / 1.15 : 1;
+          const dx = projState.pos.x - (lineT ? fiveLineGroup.position.x + lineT.xOffset : targetGroup.position.x);
+          const dy = projState.pos.y - (lineT ? fiveLineGroup.position.y : targetGroup.position.y);
+          const r = Math.hypot(dx, dy) / ringScale;
           let ringPts = 0;
           if (r <= 0.23) ringPts = 10;
           else if (r <= 0.46) ringPts = 8;
@@ -1068,7 +1074,7 @@
           else if (r <= 0.92) ringPts = 4;
           else if (r <= 1.15) ringPts = 2;
 
-          spotterHits.push({ dx, dy, pts: ringPts });
+          spotterHits.push({ dx: dx / ringScale, dy: dy / ringScale, pts: ringPts });
           drawSpotterCard();
           setSpotterText(ringPts > 0 ? `${ringPts} PTS` : 'MISS',
             `${Math.abs(Math.round(dx * 100))}cm ${dx >= 0 ? 'R' : 'L'} · ${Math.abs(Math.round(dy * 100))}cm ${dy >= 0 ? 'H' : 'L'}`);
@@ -1095,8 +1101,11 @@
               new THREE.MeshStandardMaterial({ color: ringPts === 10 ? 0xfacc15 : 0x38bdf8 })
             );
             pin.rotation.x = Math.PI / 2;
-            pin.position.set(state.targetMode === 'five_line' ? projState.pos.x : dx, dy, 0.16);
-            stuckGroup.add(pin);
+            pin.position.set(dx, dy, 0.16);
+            if (lineT) {
+              pin.userData.pin = true; lineT.group.add(pin); // pin sticks on the visible target that was hit
+              activeLineIndex = (activeLineIndex + 1) % 5; refreshFiveLineHighlight(); // advance #1 -> #5
+            } else stuckGroup.add(pin);
             spawnImpactShockwave(projState.pos, astra.agniActive);
 
             playTone(ringPts === 10 ? 880 : 620, 0.2, 'triangle', 0.18);
@@ -1125,6 +1134,7 @@
 
         if (state.stageHits >= 5) {
           while (stuckGroup.children.length) stuckGroup.remove(stuckGroup.children[0]);
+          clearFiveLinePins();
           spotterHits.length = 0; drawSpotterCard(); setSpotterText('--', '·');
           state.stageHits = 0;
           state.shotNum = 1;
@@ -1153,6 +1163,7 @@
             document.getElementById('scorecard-modal').classList.remove('hidden');
           }
           while (stuckGroup.children.length) stuckGroup.remove(stuckGroup.children[0]);
+          clearFiveLinePins(); activeLineIndex = 0; refreshFiveLineHighlight();
           spotterHits.length = 0; drawSpotterCard(); setSpotterText('--', '·');
           state.score = 0;
           state.shotNum = 1;
@@ -1380,6 +1391,7 @@
 
       document.getElementById('btn-reset').addEventListener('click', () => {
         while (stuckGroup.children.length) stuckGroup.remove(stuckGroup.children[0]);
+        clearFiveLinePins();
         spotterHits.length = 0; drawSpotterCard(); setSpotterText('--', '·');
         state.score = 0; state.shotNum = 1; state.stageHits = 0; state.totalHits = 0; state.streak = 0;
         state.baseMaxShots = 5; state.maxShots = 5; state.mulliganUsed = false; state.distance = state.startDistance; resetShotAim(); resetAstrasForStage(); activeLineIndex = 0; refreshFiveLineHighlight();
@@ -1819,11 +1831,13 @@
             camera.lookAt(projState.pos.x, projState.pos.y, projState.pos.z - 4.0);
           }
 
-          const faceZ = targetGroup.position.z + 0.08;
+          const isLine = state.targetMode === 'five_line'; // 5-line hit plane follows the visible line at the current distance
+          const baseZ = isLine ? fiveLineGroup.position.z : targetGroup.position.z;
+          const faceZ = baseZ + (isLine ? 0.07 : 0.08);
           if (prevZ >= faceZ && projState.pos.z <= faceZ) {
             camera.position.set(0, 1.62, 0.35);
             resolveImpact(true);
-          } else if (projState.pos.y <= 0.02 || projState.pos.z < targetGroup.position.z - 15) {
+          } else if (projState.pos.y <= 0.02 || projState.pos.z < baseZ - 15) {
             camera.position.set(0, 1.62, 0.35);
             resolveImpact(false);
           }
