@@ -626,6 +626,7 @@
         fiveLineTargets.forEach((t, i) => {
           const active = (i === activeLineIndex);
           t.halo.visible = active;
+          if (t.badge.material.map) t.badge.material.map.dispose(); // free the old badge texture
           t.badge.material.map = makeNumberBadgeTexture(t.num, active);
           t.badge.material.needsUpdate = true;
         });
@@ -846,8 +847,8 @@
 
       function updateTrajectoryArc() {
         const v0 = launchVelocity() * (state.dragging ? (0.6 + state.drawCharge * 0.45) : 1.0);
-        const stanceJitterEl = shotAimAdjusted ? 0 : (Math.random() - 0.5) * 0.65;
-        const stanceJitterYw = shotAimAdjusted ? 0 : (Math.random() - 0.5) * 0.65;
+        const stanceJitterEl = shotAimAdjusted ? 0 : stanceJitter.el;
+        const stanceJitterYw = shotAimAdjusted ? 0 : stanceJitter.yw;
         const el = THREE.MathUtils.degToRad(state.elevDeg + stanceJitterEl);
         const yw = THREE.MathUtils.degToRad(state.yawDeg + stanceJitterYw);
         const vx0 = Math.sin(yw) * Math.cos(el) * v0;
@@ -932,8 +933,8 @@
         projMesh.visible = true;
         projState.pos.copy(shotOrigin);
         const v0 = launchVelocity() * (0.6 + charge * 0.45);
-        const stanceJitterEl = shotAimAdjusted ? 0 : (Math.random() - 0.5) * 0.65;
-        const stanceJitterYw = shotAimAdjusted ? 0 : (Math.random() - 0.5) * 0.65;
+        const stanceJitterEl = shotAimAdjusted ? 0 : stanceJitter.el;
+        const stanceJitterYw = shotAimAdjusted ? 0 : stanceJitter.yw;
         const el = THREE.MathUtils.degToRad(state.elevDeg + stanceJitterEl);
         const yw = THREE.MathUtils.degToRad(state.yawDeg + stanceJitterYw);
         projState.vel.set(
@@ -1216,7 +1217,10 @@
         return Math.round(clamped / 0.002) * 0.002;
       }
       let shotAimAdjusted = true;
+      const stanceJitter = { el: 0, yw: 0 }; // one stance wobble per shot, shared by the aim arc and the shot
       function resetShotAim() {
+        stanceJitter.el = (Math.random() - 0.5) * 0.65;
+        stanceJitter.yw = (Math.random() - 0.5) * 0.65;
         const baseEl = GAME_MODE === 'pistol' ? 1.400 : 6.500;
         const driftEl = (Math.random() - 0.5) * 0.48;
         const driftYw = (Math.random() - 0.5) * 0.44;
@@ -1237,12 +1241,12 @@
           const delta = Number(btn.getAttribute('data-delta'));
           if (axis === 'elev') {
             state.elevDeg = snap002(state.elevDeg + delta, -5, 26);
-            shotAimAdjusted = true; shotAimAdjusted = true; shotAimAdjusted = true; document.getElementById('in-elev').value = state.elevDeg.toFixed(3);
+            shotAimAdjusted = true; document.getElementById('in-elev').value = state.elevDeg.toFixed(3);
           } else {
             state.yawDeg = snap002(state.yawDeg + delta, -12, 12);
             document.getElementById('in-yaw').value = state.yawDeg.toFixed(3);
           }
-          shotAimAdjusted = true; shotAimAdjusted = true; shotAimAdjusted = true; playTone(980, 0.025, 'sine', 0.06);
+          shotAimAdjusted = true; playTone(980, 0.025, 'sine', 0.06);
           updateUI();
         });
       });
@@ -1253,7 +1257,7 @@
         const sens = state.scoped ? 0.002 : 0.036;
         state.elevDeg = snap002(dragStart.el - (e.clientY - dragStart.y) * sens, -5, 26);
         state.yawDeg = snap002(dragStart.yw + (e.clientX - dragStart.x) * sens, -12, 12);
-        shotAimAdjusted = true; shotAimAdjusted = true; shotAimAdjusted = true; document.getElementById('in-elev').value = state.elevDeg.toFixed(3);
+        shotAimAdjusted = true; document.getElementById('in-elev').value = state.elevDeg.toFixed(3);
         document.getElementById('in-yaw').value = state.yawDeg.toFixed(3);
         updateUI();
       });
@@ -1277,7 +1281,7 @@
         const sens = state.scoped ? 0.002 : 0.040;
         state.elevDeg = snap002(tStart.el - (e.clientY - tStart.y) * sens, -5, 26);
         state.yawDeg = snap002(tStart.yw + (e.clientX - tStart.x) * sens, -12, 12);
-        shotAimAdjusted = true; shotAimAdjusted = true; shotAimAdjusted = true; document.getElementById('in-elev').value = state.elevDeg.toFixed(3);
+        shotAimAdjusted = true; document.getElementById('in-elev').value = state.elevDeg.toFixed(3);
         document.getElementById('in-yaw').value = state.yawDeg.toFixed(3);
         updateUI();
       });
@@ -1400,7 +1404,7 @@
 
       document.getElementById('btn-copy-score').addEventListener('click', async e => {
         const txt = `${document.title} — ${document.getElementById('sc-score').textContent} (${document.getElementById('sc-sub').textContent}) · Play: ${SHARE_URL}`;
-        try { await navigator.clipboard.writeText(txt); e.target.textContent = '✔'; } catch (err) {}
+        try { await navigator.clipboard.writeText(txt); e.target.textContent = '✔'; setTimeout(() => { e.target.textContent = 'Copy Challenge Score'; }, 1200); } catch (err) {}
       });
       document.getElementById('btn-close-sc').addEventListener('click', () => document.getElementById('scorecard-modal').classList.add('hidden'));
 
@@ -1731,10 +1735,10 @@
 
         // Keyboard fine aim (auto-scales to 0.002° precision ticks when 3.5x Scope is held)
         const kRate = state.scoped ? 0.12 : 3.6;
-        if (keys['KeyW'] || keys['ArrowUp']) { state.elevDeg = snap002(state.elevDeg + kRate * dt, -5, 26); shotAimAdjusted = true; shotAimAdjusted = true; shotAimAdjusted = true; document.getElementById('in-elev').value = state.elevDeg.toFixed(3); updateUI(); }
-        if (keys['KeyS'] || keys['ArrowDown']) { state.elevDeg = snap002(state.elevDeg - kRate * dt, -5, 26); shotAimAdjusted = true; shotAimAdjusted = true; shotAimAdjusted = true; document.getElementById('in-elev').value = state.elevDeg.toFixed(3); updateUI(); }
-        if (keys['KeyA'] || keys['ArrowLeft']) { state.yawDeg = snap002(state.yawDeg - kRate * dt, -12, 12); document.getElementById('in-yaw').value = state.yawDeg.toFixed(3); updateUI(); }
-        if (keys['KeyD'] || keys['ArrowRight']) { state.yawDeg = snap002(state.yawDeg + kRate * dt, -12, 12); document.getElementById('in-yaw').value = state.yawDeg.toFixed(3); updateUI(); }
+        if (keys['KeyW'] || keys['ArrowUp']) { state.elevDeg = snap002(state.elevDeg + kRate * dt, -5, 26); shotAimAdjusted = true; document.getElementById('in-elev').value = state.elevDeg.toFixed(3); updateUI(); }
+        if (keys['KeyS'] || keys['ArrowDown']) { state.elevDeg = snap002(state.elevDeg - kRate * dt, -5, 26); shotAimAdjusted = true; document.getElementById('in-elev').value = state.elevDeg.toFixed(3); updateUI(); }
+        if (keys['KeyA'] || keys['ArrowLeft']) { state.yawDeg = snap002(state.yawDeg - kRate * dt, -12, 12); shotAimAdjusted = true; document.getElementById('in-yaw').value = state.yawDeg.toFixed(3); updateUI(); }
+        if (keys['KeyD'] || keys['ArrowRight']) { state.yawDeg = snap002(state.yawDeg + kRate * dt, -12, 12); shotAimAdjusted = true; document.getElementById('in-yaw').value = state.yawDeg.toFixed(3); updateUI(); }
 
         // Charge meter & bowstring pullback
         if (state.dragging && !state.flying) {
