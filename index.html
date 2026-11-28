@@ -920,7 +920,7 @@
       }
 
       function fireShot() {
-        if (state.flying) return;
+        if (state.flying || match2P.over) return; // 2P match finished: ⟳ or 👥 to leave
         initAudio();
         const eq = getEquipped();
         const charge = Math.max(0.35, state.drawCharge || 0.88);
@@ -1090,7 +1090,7 @@
             const agniMult = astra.agniActive ? 2.0 : 1.0;
             const pts = Math.round(ringPts * state.distance * (1 + state.streak * 0.1) * (projState.steadyBonus || 1.0) * moveMult * agniMult);
             state.score += pts;
-            if (state.score > state.best) {
+            if (!match2P.enabled && state.score > state.best) {
               state.best = state.score;
               localStorage.setItem(STORAGE_PREFIX + 'best', String(state.best));
             }
@@ -1131,6 +1131,7 @@
         updateAstraHud();
         resetShotAim();
         banner.innerHTML += ' · <span class="text-cyan-300 font-semibold">⟲</span>';
+        if (match2P.enabled) { end2PShot(banner); updateUI(); return; } // 2P: no stage-up / run-end
 
         if (state.stageHits >= 5) {
           while (stuckGroup.children.length) stuckGroup.remove(stuckGroup.children[0]);
@@ -1390,6 +1391,7 @@
       document.getElementById('btn-close-sc').addEventListener('click', () => document.getElementById('scorecard-modal').classList.add('hidden'));
 
       document.getElementById('btn-reset').addEventListener('click', () => {
+        match2P.enabled = false; match2P.over = false; update2PHud(); // ⟳ always returns to 1-player
         while (stuckGroup.children.length) stuckGroup.remove(stuckGroup.children[0]);
         clearFiveLinePins();
         spotterHits.length = 0; drawSpotterCard(); setSpotterText('--', '·');
@@ -1638,7 +1640,8 @@
         p2Hits: 0,
         shotsPerPlayer: 5,
         p1Shots: 0,
-        p2Shots: 0
+        p2Shots: 0,
+        over: false
       };
 
       function update2PHud() {
@@ -1648,21 +1651,54 @@
           btn.textContent = '👤';
           btn.classList.remove('ring-2', 'ring-pink-400');
         } else {
-          btn.textContent = `👥 P${match2P.turn} · ${match2P.p1Score}:${match2P.p2Score}`;
+          const lead = match2P.p1Score === match2P.p2Score ? '🤝' : `🏆P${match2P.p1Score > match2P.p2Score ? 1 : 2}`;
+          btn.textContent = `👥 ${match2P.over ? lead : 'P' + match2P.turn} · ${match2P.p1Score}:${match2P.p2Score}`;
           btn.classList.add('ring-2', 'ring-pink-400');
         }
       }
 
+      // Fresh turn for the next player: same distance, clean target, pins, spotter, pills and one ➕1
+      function reset2PTurn() {
+        while (stuckGroup.children.length) stuckGroup.remove(stuckGroup.children[0]);
+        clearFiveLinePins(); activeLineIndex = 0; refreshFiveLineHighlight();
+        spotterHits.length = 0; drawSpotterCard(); setSpotterText('--', '·');
+        state.score = 0; state.shotNum = 1; state.stageHits = 0; state.streak = 0;
+        state.maxShots = match2P.shotsPerPlayer; state.mulliganUsed = false;
+        resetAstrasForStage(); resetShotAim();
+      }
+
+      // Called after every 2P shot: P1 shoots 5, pass, P2 shoots 5; higher total wins, equal = tie
+      function end2PShot(banner) {
+        const p = match2P.turn === 1 ? 'p1' : 'p2';
+        match2P[p + 'Score'] = state.score; match2P[p + 'Hits'] = state.stageHits; match2P[p + 'Shots'] = state.shotNum - 1;
+        if (state.shotNum > state.maxShots) {
+          if (match2P.turn === 1) {
+            match2P.turn = 2; reset2PTurn();
+            banner.innerHTML = `<span class="text-pink-300 font-black">👥 P1 ⭐${match2P.p1Score.toLocaleString()} → P2 ▶</span>`;
+          } else {
+            match2P.over = true;
+            const a = match2P.p1Score, b = match2P.p2Score;
+            banner.innerHTML = a === b
+              ? `<span class="text-amber-300 font-black">🤝 TIE ${a.toLocaleString()} : ${b.toLocaleString()}</span> · ⟳`
+              : `<span class="text-amber-300 font-black">🏆 P${a > b ? 1 : 2} WINS ${a.toLocaleString()} : ${b.toLocaleString()}</span> · ⟳`;
+          }
+        }
+        update2PHud();
+      }
+
       document.getElementById('btn-2p')?.addEventListener('click', () => {
-        match2P.enabled = !match2P.enabled;
+        if (match2P.enabled) { // switching off: full clean return to 1-player (same as ⟳)
+          document.getElementById('btn-reset').click();
+          document.getElementById('shot-banner').innerHTML = '<span class="text-slate-300 font-bold">👤</span>';
+          return;
+        }
+        match2P.enabled = true;
+        match2P.over = false;
         match2P.turn = 1;
         match2P.p1Score = 0; match2P.p2Score = 0;
         match2P.p1Hits = 0; match2P.p2Hits = 0;
         match2P.p1Shots = 0; match2P.p2Shots = 0;
-        while (stuckGroup.children.length) stuckGroup.remove(stuckGroup.children[0]);
-        spotterHits.length = 0; drawSpotterCard();
-        state.score = 0; state.shotNum = 1; state.stageHits = 0;
-        resetShotAim();
+        reset2PTurn();
         update2PHud();
         updateUI();
         document.getElementById('shot-banner').innerHTML = match2P.enabled
