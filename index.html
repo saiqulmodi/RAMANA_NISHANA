@@ -330,6 +330,7 @@
       function triggerHaptic(ms = 30) {
         if (navigator.vibrate) navigator.vibrate(ms);
       }
+      function triggerDualRumble(ms) { triggerHaptic(ms); } // no gamepad code: phone vibration only, no-op if unsupported
 
       // --- Three.js Scene, Renderer & High-Fidelity Lighting ---
       const scene = new THREE.Scene();
@@ -879,6 +880,7 @@
         document.getElementById('hud-score').textContent = `⭐${state.score.toLocaleString()}`;
         document.getElementById('hud-best').textContent = `🏆${state.best.toLocaleString()}`;
         document.getElementById('hud-wind').textContent = `${state.wind >= 0 ? '+' : ''}${state.wind.toFixed(1)} m/s ${state.wind >= 0 ? '→' : '←'}`;
+        document.getElementById('hud-wind-far').textContent = `${state.windFar >= 0 ? '+' : ''}${state.windFar.toFixed(1)} m/s ${state.windFar >= 0 ? '→' : '←'}`;
         const fmtDeg = v => `${v >= 0 ? '+' : ''}${v.toFixed(3)}°`;
         document.getElementById('hud-elev').textContent = fmtDeg(state.elevDeg);
         document.getElementById('hud-yaw').textContent = fmtDeg(state.yawDeg);
@@ -887,7 +889,6 @@
         const scRead = document.getElementById('scope-readout');
         if (scRead) scRead.textContent = `3.5× · ${state.distance}m · ↕${fmtDeg(state.elevDeg)} · ↔${fmtDeg(state.yawDeg)}`;
         document.getElementById('lbl-weight').textContent = GAME_MODE === 'pistol' ? `${state.weight} gr` : `${state.weight} lbs`;
-        document.getElementById('scope-readout').textContent = `3.5× · ${state.distance}m`;
 
         const mSel = document.getElementById('sel-target-mode');
         if (mSel && mSel.value !== state.targetMode) mSel.value = state.targetMode;
@@ -1116,8 +1117,7 @@
         }
 
         state.shotNum++;
-        state.wind = Math.round((state.wind + (Math.random() - 0.5) * 1.2) * 10) / 10;
-        if (astra.vayuShotsLeft > 0) { astra.vayuShotsLeft--; state.wind = 0.0; } else { state.wind = Math.max(-4.5, Math.min(4.5, state.wind)); }
+        rollWinds();
         astra.agniActive = false;
         updateAstraHud();
         resetShotAim();
@@ -1278,7 +1278,7 @@
       ['pointerup', 'pointercancel'].forEach(ev => touchScope.addEventListener(ev, () => { state.scoped = false; document.getElementById('scope-overlay').classList.add('hidden'); }));
 
       document.getElementById('in-elev').addEventListener('input', e => { shotAimAdjusted = true; state.elevDeg = snap002(Number(e.target.value), -5, 26); updateUI(); });
-      document.getElementById('in-yaw').addEventListener('input', e => { shotAimAdjusted = true; state.yawDeg = snap002(Number(e.target.value), -6, 6); updateUI(); });
+      document.getElementById('in-yaw').addEventListener('input', e => { shotAimAdjusted = true; state.yawDeg = snap002(Number(e.target.value), -12, 12); updateUI(); });
       document.getElementById('in-weight').addEventListener('input', e => { state.weight = Number(e.target.value); updateUI(); });
       document.getElementById('btn-fire-desk').addEventListener('click', () => { state.drawCharge = 0.89; fireShot(); });
       const deskScope = document.getElementById('btn-scope-desk');
@@ -1380,8 +1380,9 @@
 
       document.getElementById('btn-reset').addEventListener('click', () => {
         while (stuckGroup.children.length) stuckGroup.remove(stuckGroup.children[0]);
-        state.score = 0; state.shotNum = 1; state.stageHits = 0; state.totalHits = 0;
-        state.baseMaxShots = 5; state.maxShots = 5; state.mulliganUsed = false; state.distance = state.startDistance; resetShotAim(); resetAstrasForStage(); activeLineIndex = 0; refreshFiveLineHighlight(); resetShotAim(); resetShotAim();
+        spotterHits.length = 0; drawSpotterCard(); setSpotterText('--', '·');
+        state.score = 0; state.shotNum = 1; state.stageHits = 0; state.totalHits = 0; state.streak = 0;
+        state.baseMaxShots = 5; state.maxShots = 5; state.mulliganUsed = false; state.distance = state.startDistance; resetShotAim(); resetAstrasForStage(); activeLineIndex = 0; refreshFiveLineHighlight();
         updateUI();
       });
 
@@ -1448,7 +1449,7 @@
         if (astra.vayuCharges <= 0 || astra.vayuShotsLeft > 0) return;
         astra.vayuCharges--;
         astra.vayuShotsLeft = 2;
-        state.wind = 0.0;
+        state.wind = 0.0; state.windFar = 0.0;
         playTone(432, 0.25, 'sine', 0.16, 0);
         playTone(648, 0.30, 'sine', 0.14, 0.07);
         triggerDualRumble(60, 0.25, 0.4);
